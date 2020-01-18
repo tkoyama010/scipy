@@ -79,8 +79,7 @@ class XinSheYang02(Benchmark):
     def __init__(self, dimensions=2):
         Benchmark.__init__(self, dimensions)
 
-        self._bounds = list(zip([-2 * pi] * self.N,
-                           [2 * pi] * self.N))
+        self._bounds = list(zip([-2 * pi] * self.N, [2 * pi] * self.N))
 
         self.global_optimum = [[0 for _ in range(self.N)]]
         self.fglob = 0.0
@@ -220,8 +219,7 @@ class Xor(Benchmark):
 
         self._bounds = list(zip([-1.0] * self.N, [1.0] * self.N))
 
-        self.global_optimum = [[1.0, -1.0, 1.0,
-                               -1.0, -1.0, 1.0, 1.0, -1.0, 0.421134]]
+        self.global_optimum = [[1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 0.421134]]
         self.fglob = 0.9597588
 
     def fun(self, x, *args):

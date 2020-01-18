@@ -2,12 +2,11 @@ from ._basic import _dispatch
 from scipy._lib.uarray import Dispatchable
 import numpy as np
 
-__all__ = ['dct', 'idct', 'dst', 'idst', 'dctn', 'idctn', 'dstn', 'idstn']
+__all__ = ["dct", "idct", "dst", "idst", "dctn", "idctn", "dstn", "idstn"]
 
 
 @_dispatch
-def dctn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False,
-         workers=None):
+def dctn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False, workers=None):
     """
     Return multidimensional Discrete Cosine Transform along the specified axes.
 
@@ -64,8 +63,7 @@ def dctn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False,
 
 
 @_dispatch
-def idctn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False,
-          workers=None):
+def idctn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False, workers=None):
     """
     Return multidimensional Discrete Cosine Transform along the specified axes.
 
@@ -122,8 +120,7 @@ def idctn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False,
 
 
 @_dispatch
-def dstn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False,
-         workers=None):
+def dstn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False, workers=None):
     """
     Return multidimensional Discrete Sine Transform along the specified axes.
 
@@ -180,8 +177,7 @@ def dstn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False,
 
 
 @_dispatch
-def idstn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False,
-          workers=None):
+def idstn(x, type=2, s=None, axes=None, norm=None, overwrite_x=False, workers=None):
     """
     Return multidimensional Discrete Sine Transform along the specified axes.
 
@@ -388,8 +384,7 @@ def dct(x, type=2, n=None, axis=-1, norm=None, overwrite_x=False, workers=None):
 
 
 @_dispatch
-def idct(x, type=2, n=None, axis=-1, norm=None, overwrite_x=False,
-         workers=None):
+def idct(x, type=2, n=None, axis=-1, norm=None, overwrite_x=False, workers=None):
     """
     Return the Inverse Discrete Cosine Transform of an arbitrary type sequence.
 
@@ -569,8 +564,7 @@ def dst(x, type=2, n=None, axis=-1, norm=None, overwrite_x=False, workers=None):
 
 
 @_dispatch
-def idst(x, type=2, n=None, axis=-1, norm=None, overwrite_x=False,
-         workers=None):
+def idst(x, type=2, n=None, axis=-1, norm=None, overwrite_x=False, workers=None):
     """
     Return the Inverse Discrete Sine Transform of an arbitrary type sequence.
 

@@ -9,7 +9,7 @@ def _x_replacer(args, kwargs, dispatchables):
     if len(args) > 0:
         return (dispatchables[0],) + args[1:], kwargs
     kw = kwargs.copy()
-    kw['x'] = dispatchables[0]
+    kw["x"] = dispatchables[0]
     return args, kw
 
 
@@ -1184,8 +1184,7 @@ def irfftn(x, s=None, axes=None, norm=None, overwrite_x=False, workers=None):
 
 
 @_dispatch
-def irfft2(x, s=None, axes=(-2, -1), norm=None, overwrite_x=False,
-           workers=None):
+def irfft2(x, s=None, axes=(-2, -1), norm=None, overwrite_x=False, workers=None):
     """
     Compute the 2-D inverse FFT of a real array.
 
@@ -1464,8 +1463,7 @@ def ihfftn(x, s=None, axes=None, norm=None, overwrite_x=False, workers=None):
 
 
 @_dispatch
-def ihfft2(x, s=None, axes=(-2, -1), norm=None, overwrite_x=False,
-           workers=None):
+def ihfft2(x, s=None, axes=(-2, -1), norm=None, overwrite_x=False, workers=None):
     """
     Compute the 2-D inverse FFT of a real spectrum.
 

@@ -19,4 +19,4 @@ ftp://ftp.numerical.rl.ac.uk/pub/cutest/netlib/netlib.html
 Converted from SIF (MPS) format by Matt Haberland
 """
 
-__all__ = [s for s in dir() if not s.startswith('_')]
+__all__ = [s for s in dir() if not s.startswith("_")]

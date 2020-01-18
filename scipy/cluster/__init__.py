@@ -22,10 +22,11 @@ to generate flat clusters, and visualizing clusters with dendrograms.
 """
 from __future__ import division, print_function, absolute_import
 
-__all__ = ['vq', 'hierarchy']
+__all__ = ["vq", "hierarchy"]
 
 from . import vq, hierarchy
 
 from scipy._lib._testutils import PytestTester
+
 test = PytestTester(__name__)
 del PytestTester

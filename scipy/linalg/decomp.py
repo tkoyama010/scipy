@@ -14,21 +14,47 @@
 
 from __future__ import division, print_function, absolute_import
 
-__all__ = ['eig', 'eigvals', 'eigh', 'eigvalsh',
-           'eig_banded', 'eigvals_banded',
-           'eigh_tridiagonal', 'eigvalsh_tridiagonal', 'hessenberg', 'cdf2rdf']
+__all__ = [
+    "eig",
+    "eigvals",
+    "eigh",
+    "eigvalsh",
+    "eig_banded",
+    "eigvals_banded",
+    "eigh_tridiagonal",
+    "eigvalsh_tridiagonal",
+    "hessenberg",
+    "cdf2rdf",
+]
 
 import numpy
-from numpy import (array, isfinite, inexact, nonzero, iscomplexobj, cast,
-                   flatnonzero, conj, asarray, argsort, empty, newaxis,
-                   argwhere, iscomplex, eye, zeros, einsum)
+from numpy import (
+    array,
+    isfinite,
+    inexact,
+    nonzero,
+    iscomplexobj,
+    cast,
+    flatnonzero,
+    conj,
+    asarray,
+    argsort,
+    empty,
+    newaxis,
+    argwhere,
+    iscomplex,
+    eye,
+    zeros,
+    einsum,
+)
+
 # Local imports
 from scipy._lib._util import _asarray_validated
 from .misc import LinAlgError, _datacopied, norm
 from .lapack import get_lapack_funcs, _compute_lwork
 
 
-_I = cast['F'](1j)
+_I = cast["F"](1j)
 
 
 def _make_complex_eigvecs(w, vin, dtype):
@@ -37,11 +63,11 @@ def _make_complex_eigvecs(w, vin, dtype):
     """
     # - see LAPACK man page DGGEV at ALPHAI
     v = numpy.array(vin, dtype=dtype)
-    m = (w.imag > 0)
-    m[:-1] |= (w.imag[1:] < 0)  # workaround for LAPACK bug, cf. ticket #709
+    m = w.imag > 0
+    m[:-1] |= w.imag[1:] < 0  # workaround for LAPACK bug, cf. ticket #709
     for i in flatnonzero(m):
-        v.imag[:, i] = vin[:, i+1]
-        conj(v[:, i], v[:, i+1])
+        v.imag[:, i] = vin[:, i + 1]
+        conj(v[:, i], v[:, i + 1])
     return v
 
 
@@ -56,10 +82,10 @@ def _make_eigvals(alpha, beta, homogeneous_eigvals):
             return alpha
         else:
             w = numpy.empty_like(alpha)
-            alpha_zero = (alpha == 0)
-            beta_zero = (beta == 0)
+            alpha_zero = alpha == 0
+            beta_zero = beta == 0
             beta_nonzero = ~beta_zero
-            w[beta_nonzero] = alpha[beta_nonzero]/beta[beta_nonzero]
+            w[beta_nonzero] = alpha[beta_nonzero] / beta[beta_nonzero]
             # Use numpy.inf for complex values too since
             # 1/numpy.inf = 0, i.e., it correctly behaves as projective
             # infinity.
@@ -71,26 +97,26 @@ def _make_eigvals(alpha, beta, homogeneous_eigvals):
             return w
 
 
-def _geneig(a1, b1, left, right, overwrite_a, overwrite_b,
-            homogeneous_eigvals):
-    ggev, = get_lapack_funcs(('ggev',), (a1, b1))
+def _geneig(a1, b1, left, right, overwrite_a, overwrite_b, homogeneous_eigvals):
+    ggev, = get_lapack_funcs(("ggev",), (a1, b1))
     cvl, cvr = left, right
     res = ggev(a1, b1, lwork=-1)
     lwork = res[-2][0].real.astype(numpy.int)
-    if ggev.typecode in 'cz':
-        alpha, beta, vl, vr, work, info = ggev(a1, b1, cvl, cvr, lwork,
-                                               overwrite_a, overwrite_b)
+    if ggev.typecode in "cz":
+        alpha, beta, vl, vr, work, info = ggev(
+            a1, b1, cvl, cvr, lwork, overwrite_a, overwrite_b
+        )
         w = _make_eigvals(alpha, beta, homogeneous_eigvals)
     else:
-        alphar, alphai, beta, vl, vr, work, info = ggev(a1, b1, cvl, cvr,
-                                                        lwork, overwrite_a,
-                                                        overwrite_b)
+        alphar, alphai, beta, vl, vr, work, info = ggev(
+            a1, b1, cvl, cvr, lwork, overwrite_a, overwrite_b
+        )
         alpha = alphar + _I * alphai
         w = _make_eigvals(alpha, beta, homogeneous_eigvals)
-    _check_info(info, 'generalized eig algorithm (ggev)')
+    _check_info(info, "generalized eig algorithm (ggev)")
 
     only_real = numpy.all(w.imag == 0.0)
-    if not (ggev.typecode in 'cz' or only_real):
+    if not (ggev.typecode in "cz" or only_real):
         t = w.dtype.char
         if left:
             vl = _make_complex_eigvecs(w, vl, t)
@@ -113,8 +139,16 @@ def _geneig(a1, b1, left, right, overwrite_a, overwrite_b,
     return w, vr
 
 
-def eig(a, b=None, left=False, right=True, overwrite_a=False,
-        overwrite_b=False, check_finite=True, homogeneous_eigvals=False):
+def eig(
+    a,
+    b=None,
+    left=False,
+    right=True,
+    overwrite_a=False,
+    overwrite_b=False,
+    check_finite=True,
+    homogeneous_eigvals=False,
+):
     """
     Solve an ordinary or generalized eigenvalue problem of a square matrix.
 
@@ -211,46 +245,56 @@ def eig(a, b=None, left=False, right=True, overwrite_a=False,
     """
     a1 = _asarray_validated(a, check_finite=check_finite)
     if len(a1.shape) != 2 or a1.shape[0] != a1.shape[1]:
-        raise ValueError('expected square matrix')
+        raise ValueError("expected square matrix")
     overwrite_a = overwrite_a or (_datacopied(a1, a))
     if b is not None:
         b1 = _asarray_validated(b, check_finite=check_finite)
         overwrite_b = overwrite_b or _datacopied(b1, b)
         if len(b1.shape) != 2 or b1.shape[0] != b1.shape[1]:
-            raise ValueError('expected square matrix')
+            raise ValueError("expected square matrix")
         if b1.shape != a1.shape:
-            raise ValueError('a and b must have the same shape')
-        return _geneig(a1, b1, left, right, overwrite_a, overwrite_b,
-                       homogeneous_eigvals)
+            raise ValueError("a and b must have the same shape")
+        return _geneig(
+            a1, b1, left, right, overwrite_a, overwrite_b, homogeneous_eigvals
+        )
 
-    geev, geev_lwork = get_lapack_funcs(('geev', 'geev_lwork'), (a1,))
+    geev, geev_lwork = get_lapack_funcs(("geev", "geev_lwork"), (a1,))
     compute_vl, compute_vr = left, right
 
-    lwork = _compute_lwork(geev_lwork, a1.shape[0],
-                           compute_vl=compute_vl,
-                           compute_vr=compute_vr)
+    lwork = _compute_lwork(
+        geev_lwork, a1.shape[0], compute_vl=compute_vl, compute_vr=compute_vr
+    )
 
-    if geev.typecode in 'cz':
-        w, vl, vr, info = geev(a1, lwork=lwork,
-                               compute_vl=compute_vl,
-                               compute_vr=compute_vr,
-                               overwrite_a=overwrite_a)
+    if geev.typecode in "cz":
+        w, vl, vr, info = geev(
+            a1,
+            lwork=lwork,
+            compute_vl=compute_vl,
+            compute_vr=compute_vr,
+            overwrite_a=overwrite_a,
+        )
         w = _make_eigvals(w, None, homogeneous_eigvals)
     else:
-        wr, wi, vl, vr, info = geev(a1, lwork=lwork,
-                                    compute_vl=compute_vl,
-                                    compute_vr=compute_vr,
-                                    overwrite_a=overwrite_a)
-        t = {'f': 'F', 'd': 'D'}[wr.dtype.char]
+        wr, wi, vl, vr, info = geev(
+            a1,
+            lwork=lwork,
+            compute_vl=compute_vl,
+            compute_vr=compute_vr,
+            overwrite_a=overwrite_a,
+        )
+        t = {"f": "F", "d": "D"}[wr.dtype.char]
         w = wr + _I * wi
         w = _make_eigvals(w, None, homogeneous_eigvals)
 
-    _check_info(info, 'eig algorithm (geev)',
-                positive='did not converge (only eigenvalues '
-                         'with order >= %d have converged)')
+    _check_info(
+        info,
+        "eig algorithm (geev)",
+        positive="did not converge (only eigenvalues "
+        "with order >= %d have converged)",
+    )
 
     only_real = numpy.all(w.imag == 0.0)
-    if not (geev.typecode in 'cz' or only_real):
+    if not (geev.typecode in "cz" or only_real):
         t = w.dtype.char
         if left:
             vl = _make_complex_eigvecs(w, vl, t)
@@ -265,9 +309,18 @@ def eig(a, b=None, left=False, right=True, overwrite_a=False,
     return w, vr
 
 
-def eigh(a, b=None, lower=True, eigvals_only=False, overwrite_a=False,
-         overwrite_b=False, turbo=True, eigvals=None, type=1,
-         check_finite=True):
+def eigh(
+    a,
+    b=None,
+    lower=True,
+    eigvals_only=False,
+    overwrite_a=False,
+    overwrite_b=False,
+    turbo=True,
+    eigvals=None,
+    type=1,
+    check_finite=True,
+):
     """
     Solve an ordinary or generalized eigenvalue problem for a complex
     Hermitian or real symmetric matrix.
@@ -371,7 +424,7 @@ def eigh(a, b=None, lower=True, eigvals_only=False, overwrite_a=False,
     """
     a1 = _asarray_validated(a, check_finite=check_finite)
     if len(a1.shape) != 2 or a1.shape[0] != a1.shape[1]:
-        raise ValueError('expected square matrix')
+        raise ValueError("expected square matrix")
     overwrite_a = overwrite_a or (_datacopied(a1, a))
     if iscomplexobj(a1):
         cplx = True
@@ -381,11 +434,13 @@ def eigh(a, b=None, lower=True, eigvals_only=False, overwrite_a=False,
         b1 = _asarray_validated(b, check_finite=check_finite)
         overwrite_b = overwrite_b or _datacopied(b1, b)
         if len(b1.shape) != 2 or b1.shape[0] != b1.shape[1]:
-            raise ValueError('expected square matrix')
+            raise ValueError("expected square matrix")
 
         if b1.shape != a1.shape:
-            raise ValueError("wrong b dimensions %s, should "
-                             "be %s" % (str(b1.shape), str(a1.shape)))
+            raise ValueError(
+                "wrong b dimensions %s, should "
+                "be %s" % (str(b1.shape), str(a1.shape))
+            )
         if iscomplexobj(b1):
             cplx = True
         else:
@@ -394,72 +449,107 @@ def eigh(a, b=None, lower=True, eigvals_only=False, overwrite_a=False,
         b1 = None
 
     # Set job for Fortran routines
-    _job = (eigvals_only and 'N') or 'V'
+    _job = (eigvals_only and "N") or "V"
 
     # port eigenvalue range from Python to Fortran convention
     if eigvals is not None:
         lo, hi = eigvals
         if lo < 0 or hi >= a1.shape[0]:
-            raise ValueError('The eigenvalue range specified is not valid.\n'
-                             'Valid range is [%s,%s]' % (0, a1.shape[0]-1))
+            raise ValueError(
+                "The eigenvalue range specified is not valid.\n"
+                "Valid range is [%s,%s]" % (0, a1.shape[0] - 1)
+            )
         lo += 1
         hi += 1
         eigvals = (lo, hi)
 
     # set lower
     if lower:
-        uplo = 'L'
+        uplo = "L"
     else:
-        uplo = 'U'
+        uplo = "U"
 
     # fix prefix for lapack routines
     if cplx:
-        pfx = 'he'
+        pfx = "he"
     else:
-        pfx = 'sy'
+        pfx = "sy"
 
     #  Standard Eigenvalue Problem
     #  Use '*evr' routines
     # FIXME: implement calculation of optimal lwork
     #        for all lapack routines
     if b1 is None:
-        driver = pfx+'evr'
+        driver = pfx + "evr"
         (evr,) = get_lapack_funcs((driver,), (a1,))
         if eigvals is None:
-            w, v, info = evr(a1, uplo=uplo, jobz=_job, range="A", il=1,
-                             iu=a1.shape[0], overwrite_a=overwrite_a)
+            w, v, info = evr(
+                a1,
+                uplo=uplo,
+                jobz=_job,
+                range="A",
+                il=1,
+                iu=a1.shape[0],
+                overwrite_a=overwrite_a,
+            )
         else:
             (lo, hi) = eigvals
-            w_tot, v, info = evr(a1, uplo=uplo, jobz=_job, range="I",
-                                 il=lo, iu=hi, overwrite_a=overwrite_a)
-            w = w_tot[0:hi-lo+1]
+            w_tot, v, info = evr(
+                a1,
+                uplo=uplo,
+                jobz=_job,
+                range="I",
+                il=lo,
+                iu=hi,
+                overwrite_a=overwrite_a,
+            )
+            w = w_tot[0 : hi - lo + 1]
 
     # Generalized Eigenvalue Problem
     else:
         # Use '*gvx' routines if range is specified
         if eigvals is not None:
-            driver = pfx+'gvx'
+            driver = pfx + "gvx"
             (gvx,) = get_lapack_funcs((driver,), (a1, b1))
             (lo, hi) = eigvals
-            w_tot, v, ifail, info = gvx(a1, b1, uplo=uplo, iu=hi,
-                                        itype=type, jobz=_job, il=lo,
-                                        overwrite_a=overwrite_a,
-                                        overwrite_b=overwrite_b)
-            w = w_tot[0:hi-lo+1]
+            w_tot, v, ifail, info = gvx(
+                a1,
+                b1,
+                uplo=uplo,
+                iu=hi,
+                itype=type,
+                jobz=_job,
+                il=lo,
+                overwrite_a=overwrite_a,
+                overwrite_b=overwrite_b,
+            )
+            w = w_tot[0 : hi - lo + 1]
         # Use '*gvd' routine if turbo is on and no eigvals are specified
         elif turbo:
-            driver = pfx+'gvd'
+            driver = pfx + "gvd"
             (gvd,) = get_lapack_funcs((driver,), (a1, b1))
-            v, w, info = gvd(a1, b1, uplo=uplo, itype=type, jobz=_job,
-                             overwrite_a=overwrite_a,
-                             overwrite_b=overwrite_b)
+            v, w, info = gvd(
+                a1,
+                b1,
+                uplo=uplo,
+                itype=type,
+                jobz=_job,
+                overwrite_a=overwrite_a,
+                overwrite_b=overwrite_b,
+            )
         # Use '*gv' routine if turbo is off and no eigvals are specified
         else:
-            driver = pfx+'gv'
+            driver = pfx + "gv"
             (gv,) = get_lapack_funcs((driver,), (a1, b1))
-            v, w, info = gv(a1, b1, uplo=uplo, itype=type, jobz=_job,
-                            overwrite_a=overwrite_a,
-                            overwrite_b=overwrite_b)
+            v, w, info = gv(
+                a1,
+                b1,
+                uplo=uplo,
+                itype=type,
+                jobz=_job,
+                overwrite_a=overwrite_a,
+                overwrite_b=overwrite_b,
+            )
 
     # Check if we had a  successful exit
     if info == 0:
@@ -474,26 +564,39 @@ def eigh(a, b=None, lower=True, eigvals_only=False, overwrite_a=False,
     # The algorithm failed to converge.
     elif 0 < info <= b1.shape[0]:
         if eigvals is not None:
-            raise LinAlgError("the eigenvectors %s failed to"
-                              " converge." % nonzero(ifail)-1)
+            raise LinAlgError(
+                "the eigenvectors %s failed to" " converge." % nonzero(ifail) - 1
+            )
         else:
-            raise LinAlgError("internal fortran routine failed to converge: "
-                              "%i off-diagonal elements of an "
-                              "intermediate tridiagonal form did not converge"
-                              " to zero." % info)
+            raise LinAlgError(
+                "internal fortran routine failed to converge: "
+                "%i off-diagonal elements of an "
+                "intermediate tridiagonal form did not converge"
+                " to zero." % info
+            )
 
     # This occurs when b is not positive definite
     else:
-        raise LinAlgError("the leading minor of order %i"
-                          " of 'b' is not positive definite. The"
-                          " factorization of 'b' could not be completed"
-                          " and no eigenvalues or eigenvectors were"
-                          " computed." % (info-b1.shape[0]))
+        raise LinAlgError(
+            "the leading minor of order %i"
+            " of 'b' is not positive definite. The"
+            " factorization of 'b' could not be completed"
+            " and no eigenvalues or eigenvectors were"
+            " computed." % (info - b1.shape[0])
+        )
 
 
-_conv_dict = {0: 0, 1: 1, 2: 2,
-              'all': 0, 'value': 1, 'index': 2,
-              'a': 0, 'v': 1, 'i': 2}
+_conv_dict = {
+    0: 0,
+    1: 1,
+    2: 2,
+    "all": 0,
+    "value": 1,
+    "index": 2,
+    "a": 0,
+    "v": 1,
+    "i": 2,
+}
 
 
 def _check_select(select, select_range, max_ev, max_len):
@@ -503,33 +606,43 @@ def _check_select(select, select_range, max_ev, max_len):
     try:
         select = _conv_dict[select]
     except KeyError:
-        raise ValueError('invalid argument for select')
-    vl, vu = 0., 1.
+        raise ValueError("invalid argument for select")
+    vl, vu = 0.0, 1.0
     il = iu = 1
     if select != 0:  # (non-all)
         sr = asarray(select_range)
         if sr.ndim != 1 or sr.size != 2 or sr[1] < sr[0]:
-            raise ValueError('select_range must be a 2-element array-like '
-                             'in nondecreasing order')
+            raise ValueError(
+                "select_range must be a 2-element array-like " "in nondecreasing order"
+            )
         if select == 1:  # (value)
             vl, vu = sr
             if max_ev == 0:
                 max_ev = max_len
         else:  # 2 (index)
-            if sr.dtype.char.lower() not in 'hilqp':
-                raise ValueError('when using select="i", select_range must '
-                                 'contain integers, got dtype %s (%s)'
-                                 % (sr.dtype, sr.dtype.char))
+            if sr.dtype.char.lower() not in "hilqp":
+                raise ValueError(
+                    'when using select="i", select_range must '
+                    "contain integers, got dtype %s (%s)" % (sr.dtype, sr.dtype.char)
+                )
             # translate Python (0 ... N-1) into Fortran (1 ... N) with + 1
             il, iu = sr + 1
             if min(il, iu) < 1 or max(il, iu) > max_len:
-                raise ValueError('select_range out of bounds')
+                raise ValueError("select_range out of bounds")
             max_ev = iu - il + 1
     return select, vl, vu, il, iu, max_ev
 
 
-def eig_banded(a_band, lower=False, eigvals_only=False, overwrite_a_band=False,
-               select='a', select_range=None, max_ev=0, check_finite=True):
+def eig_banded(
+    a_band,
+    lower=False,
+    eigvals_only=False,
+    overwrite_a_band=False,
+    select="a",
+    select_range=None,
+    max_ev=0,
+    check_finite=True,
+):
     """
     Solve real symmetric or complex Hermitian band matrix eigenvalue problem.
 
@@ -645,43 +758,54 @@ def eig_banded(a_band, lower=False, eigvals_only=False, overwrite_a_band=False,
         overwrite_a_band = 1
 
     if len(a1.shape) != 2:
-        raise ValueError('expected a 2-D array')
+        raise ValueError("expected a 2-D array")
     select, vl, vu, il, iu, max_ev = _check_select(
-        select, select_range, max_ev, a1.shape[1])
+        select, select_range, max_ev, a1.shape[1]
+    )
     del select_range
     if select == 0:
-        if a1.dtype.char in 'GFD':
+        if a1.dtype.char in "GFD":
             # FIXME: implement this somewhen, for now go with builtin values
             # FIXME: calc optimal lwork by calling ?hbevd(lwork=-1)
             #        or by using calc_lwork.f ???
             # lwork = calc_lwork.hbevd(bevd.typecode, a1.shape[0], lower)
-            internal_name = 'hbevd'
+            internal_name = "hbevd"
         else:  # a1.dtype.char in 'fd':
             # FIXME: implement this somewhen, for now go with builtin values
             #         see above
             # lwork = calc_lwork.sbevd(bevd.typecode, a1.shape[0], lower)
-            internal_name = 'sbevd'
+            internal_name = "sbevd"
         bevd, = get_lapack_funcs((internal_name,), (a1,))
-        w, v, info = bevd(a1, compute_v=not eigvals_only,
-                          lower=lower, overwrite_ab=overwrite_a_band)
+        w, v, info = bevd(
+            a1, compute_v=not eigvals_only, lower=lower, overwrite_ab=overwrite_a_band
+        )
     else:  # select in [1, 2]
         if eigvals_only:
             max_ev = 1
         # calculate optimal abstol for dsbevx (see manpage)
-        if a1.dtype.char in 'fF':  # single precision
-            lamch, = get_lapack_funcs(('lamch',), (array(0, dtype='f'),))
+        if a1.dtype.char in "fF":  # single precision
+            lamch, = get_lapack_funcs(("lamch",), (array(0, dtype="f"),))
         else:
-            lamch, = get_lapack_funcs(('lamch',), (array(0, dtype='d'),))
-        abstol = 2 * lamch('s')
-        if a1.dtype.char in 'GFD':
-            internal_name = 'hbevx'
+            lamch, = get_lapack_funcs(("lamch",), (array(0, dtype="d"),))
+        abstol = 2 * lamch("s")
+        if a1.dtype.char in "GFD":
+            internal_name = "hbevx"
         else:  # a1.dtype.char in 'gfd'
-            internal_name = 'sbevx'
+            internal_name = "sbevx"
         bevx, = get_lapack_funcs((internal_name,), (a1,))
         w, v, m, ifail, info = bevx(
-            a1, vl, vu, il, iu, compute_v=not eigvals_only, mmax=max_ev,
-            range=select, lower=lower, overwrite_ab=overwrite_a_band,
-            abstol=abstol)
+            a1,
+            vl,
+            vu,
+            il,
+            iu,
+            compute_v=not eigvals_only,
+            mmax=max_ev,
+            range=select,
+            lower=lower,
+            overwrite_ab=overwrite_a_band,
+            abstol=abstol,
+        )
         # crop off w and v
         w = w[:m]
         if not eigvals_only:
@@ -693,8 +817,7 @@ def eig_banded(a_band, lower=False, eigvals_only=False, overwrite_a_band=False,
     return w, v
 
 
-def eigvals(a, b=None, overwrite_a=False, check_finite=True,
-            homogeneous_eigvals=False):
+def eigvals(a, b=None, overwrite_a=False, check_finite=True, homogeneous_eigvals=False):
     """
     Compute eigenvalues from an ordinary or generalized eigenvalue problem.
 
@@ -762,14 +885,28 @@ def eigvals(a, b=None, overwrite_a=False, check_finite=True,
            [1.+0.j, 1.+0.j, 1.+0.j]])
 
     """
-    return eig(a, b=b, left=0, right=0, overwrite_a=overwrite_a,
-               check_finite=check_finite,
-               homogeneous_eigvals=homogeneous_eigvals)
+    return eig(
+        a,
+        b=b,
+        left=0,
+        right=0,
+        overwrite_a=overwrite_a,
+        check_finite=check_finite,
+        homogeneous_eigvals=homogeneous_eigvals,
+    )
 
 
-def eigvalsh(a, b=None, lower=True, overwrite_a=False,
-             overwrite_b=False, turbo=True, eigvals=None, type=1,
-             check_finite=True):
+def eigvalsh(
+    a,
+    b=None,
+    lower=True,
+    overwrite_a=False,
+    overwrite_b=False,
+    turbo=True,
+    eigvals=None,
+    type=1,
+    check_finite=True,
+):
     """
     Solve an ordinary or generalized eigenvalue problem for a complex
     Hermitian or real symmetric matrix.
@@ -853,14 +990,28 @@ def eigvalsh(a, b=None, lower=True, overwrite_a=False,
     array([-3.74637491, -0.76263923,  6.08502336, 12.42399079])
 
     """
-    return eigh(a, b=b, lower=lower, eigvals_only=True,
-                overwrite_a=overwrite_a, overwrite_b=overwrite_b,
-                turbo=turbo, eigvals=eigvals, type=type,
-                check_finite=check_finite)
+    return eigh(
+        a,
+        b=b,
+        lower=lower,
+        eigvals_only=True,
+        overwrite_a=overwrite_a,
+        overwrite_b=overwrite_b,
+        turbo=turbo,
+        eigvals=eigvals,
+        type=type,
+        check_finite=check_finite,
+    )
 
 
-def eigvals_banded(a_band, lower=False, overwrite_a_band=False,
-                   select='a', select_range=None, check_finite=True):
+def eigvals_banded(
+    a_band,
+    lower=False,
+    overwrite_a_band=False,
+    select="a",
+    select_range=None,
+    check_finite=True,
+):
     """
     Solve real symmetric or complex Hermitian band matrix eigenvalue problem.
 
@@ -946,13 +1097,26 @@ def eigvals_banded(a_band, lower=False, overwrite_a_band=False,
     >>> w
     array([-4.26200532, -2.22987175,  3.95222349, 12.53965359])
     """
-    return eig_banded(a_band, lower=lower, eigvals_only=1,
-                      overwrite_a_band=overwrite_a_band, select=select,
-                      select_range=select_range, check_finite=check_finite)
+    return eig_banded(
+        a_band,
+        lower=lower,
+        eigvals_only=1,
+        overwrite_a_band=overwrite_a_band,
+        select=select,
+        select_range=select_range,
+        check_finite=check_finite,
+    )
 
 
-def eigvalsh_tridiagonal(d, e, select='a', select_range=None,
-                         check_finite=True, tol=0., lapack_driver='auto'):
+def eigvalsh_tridiagonal(
+    d,
+    e,
+    select="a",
+    select_range=None,
+    check_finite=True,
+    tol=0.0,
+    lapack_driver="auto",
+):
     """
     Solve eigenvalue problem for a real symmetric tridiagonal matrix.
 
@@ -1027,12 +1191,27 @@ def eigvalsh_tridiagonal(d, e, select='a', select_range=None,
     True
     """
     return eigh_tridiagonal(
-        d, e, eigvals_only=True, select=select, select_range=select_range,
-        check_finite=check_finite, tol=tol, lapack_driver=lapack_driver)
+        d,
+        e,
+        eigvals_only=True,
+        select=select,
+        select_range=select_range,
+        check_finite=check_finite,
+        tol=tol,
+        lapack_driver=lapack_driver,
+    )
 
 
-def eigh_tridiagonal(d, e, eigvals_only=False, select='a', select_range=None,
-                     check_finite=True, tol=0., lapack_driver='auto'):
+def eigh_tridiagonal(
+    d,
+    e,
+    eigvals_only=False,
+    select="a",
+    select_range=None,
+    check_finite=True,
+    tol=0.0,
+    lapack_driver="auto",
+):
     """
     Solve eigenvalue problem for a real symmetric tridiagonal matrix.
 
@@ -1123,67 +1302,80 @@ def eigh_tridiagonal(d, e, eigvals_only=False, select='a', select_range=None,
     e = _asarray_validated(e, check_finite=check_finite)
     for check in (d, e):
         if check.ndim != 1:
-            raise ValueError('expected a 1-D array')
-        if check.dtype.char in 'GFD':  # complex
-            raise TypeError('Only real arrays currently supported')
+            raise ValueError("expected a 1-D array")
+        if check.dtype.char in "GFD":  # complex
+            raise TypeError("Only real arrays currently supported")
     if d.size != e.size + 1:
-        raise ValueError('d (%s) must have one more element than e (%s)'
-                         % (d.size, e.size))
-    select, vl, vu, il, iu, _ = _check_select(
-        select, select_range, 0, d.size)
+        raise ValueError(
+            "d (%s) must have one more element than e (%s)" % (d.size, e.size)
+        )
+    select, vl, vu, il, iu, _ = _check_select(select, select_range, 0, d.size)
     if not isinstance(lapack_driver, str):
-        raise TypeError('lapack_driver must be str')
-    drivers = ('auto', 'stemr', 'sterf', 'stebz', 'stev')
+        raise TypeError("lapack_driver must be str")
+    drivers = ("auto", "stemr", "sterf", "stebz", "stev")
     if lapack_driver not in drivers:
-        raise ValueError('lapack_driver must be one of %s, got %s'
-                         % (drivers, lapack_driver))
-    if lapack_driver == 'auto':
-        lapack_driver = 'stemr' if select == 0 else 'stebz'
+        raise ValueError(
+            "lapack_driver must be one of %s, got %s" % (drivers, lapack_driver)
+        )
+    if lapack_driver == "auto":
+        lapack_driver = "stemr" if select == 0 else "stebz"
     func, = get_lapack_funcs((lapack_driver,), (d, e))
     compute_v = not eigvals_only
-    if lapack_driver == 'sterf':
+    if lapack_driver == "sterf":
         if select != 0:
             raise ValueError('sterf can only be used when select == "a"')
         if not eigvals_only:
-            raise ValueError('sterf can only be used when eigvals_only is '
-                             'True')
+            raise ValueError("sterf can only be used when eigvals_only is " "True")
         w, info = func(d, e)
         m = len(w)
-    elif lapack_driver == 'stev':
+    elif lapack_driver == "stev":
         if select != 0:
             raise ValueError('stev can only be used when select == "a"')
         w, v, info = func(d, e, compute_v=compute_v)
         m = len(w)
-    elif lapack_driver == 'stebz':
+    elif lapack_driver == "stebz":
         tol = float(tol)
-        internal_name = 'stebz'
+        internal_name = "stebz"
         stebz, = get_lapack_funcs((internal_name,), (d, e))
         # If getting eigenvectors, needs to be block-ordered (B) instead of
         # matrix-ordered (E), and we will reorder later
-        order = 'E' if eigvals_only else 'B'
-        m, w, iblock, isplit, info = stebz(d, e, select, vl, vu, il, iu, tol,
-                                           order)
-    else:   # 'stemr'
+        order = "E" if eigvals_only else "B"
+        m, w, iblock, isplit, info = stebz(d, e, select, vl, vu, il, iu, tol, order)
+    else:  # 'stemr'
         # ?STEMR annoyingly requires size N instead of N-1
-        e_ = empty(e.size+1, e.dtype)
+        e_ = empty(e.size + 1, e.dtype)
         e_[:-1] = e
-        stemr_lwork, = get_lapack_funcs(('stemr_lwork',), (d, e))
-        lwork, liwork, info = stemr_lwork(d, e_, select, vl, vu, il, iu,
-                                          compute_v=compute_v)
-        _check_info(info, 'stemr_lwork')
-        m, w, v, info = func(d, e_, select, vl, vu, il, iu,
-                             compute_v=compute_v, lwork=lwork, liwork=liwork)
-    _check_info(info, lapack_driver + ' (eigh_tridiagonal)')
+        stemr_lwork, = get_lapack_funcs(("stemr_lwork",), (d, e))
+        lwork, liwork, info = stemr_lwork(
+            d, e_, select, vl, vu, il, iu, compute_v=compute_v
+        )
+        _check_info(info, "stemr_lwork")
+        m, w, v, info = func(
+            d,
+            e_,
+            select,
+            vl,
+            vu,
+            il,
+            iu,
+            compute_v=compute_v,
+            lwork=lwork,
+            liwork=liwork,
+        )
+    _check_info(info, lapack_driver + " (eigh_tridiagonal)")
     w = w[:m]
     if eigvals_only:
         return w
     else:
         # Do we still need to compute the eigenvalues?
-        if lapack_driver == 'stebz':
-            func, = get_lapack_funcs(('stein',), (d, e))
+        if lapack_driver == "stebz":
+            func, = get_lapack_funcs(("stein",), (d, e))
             v, info = func(d, e, w, iblock, isplit)
-            _check_info(info, 'stein (eigh_tridiagonal)',
-                        positive='%d eigenvectors failed to converge')
+            _check_info(
+                info,
+                "stein (eigh_tridiagonal)",
+                positive="%d eigenvectors failed to converge",
+            )
             # Convert block-order to matrix-order
             order = argsort(w)
             w, v = w[order], v[:, order]
@@ -1192,13 +1384,14 @@ def eigh_tridiagonal(d, e, eigvals_only=False, select='a', select_range=None,
         return w, v
 
 
-def _check_info(info, driver, positive='did not converge (LAPACK info=%d)'):
+def _check_info(info, driver, positive="did not converge (LAPACK info=%d)"):
     """Check info return value."""
     if info < 0:
-        raise ValueError('illegal value in argument %d of internal %s'
-                         % (-info, driver))
+        raise ValueError(
+            "illegal value in argument %d of internal %s" % (-info, driver)
+        )
     if info > 0 and positive:
-        raise LinAlgError(("%s " + positive) % (driver, info,))
+        raise LinAlgError(("%s " + positive) % (driver, info))
 
 
 def hessenberg(a, calc_q=False, overwrite_a=False, check_finite=True):
@@ -1249,7 +1442,7 @@ def hessenberg(a, calc_q=False, overwrite_a=False, check_finite=True):
     """
     a1 = _asarray_validated(a, check_finite=check_finite)
     if len(a1.shape) != 2 or (a1.shape[0] != a1.shape[1]):
-        raise ValueError('expected square matrix')
+        raise ValueError("expected square matrix")
     overwrite_a = overwrite_a or (_datacopied(a1, a))
 
     # if 2x2 or smaller: already in Hessenberg
@@ -1258,26 +1451,27 @@ def hessenberg(a, calc_q=False, overwrite_a=False, check_finite=True):
             return a1, numpy.eye(a1.shape[0])
         return a1
 
-    gehrd, gebal, gehrd_lwork = get_lapack_funcs(('gehrd', 'gebal',
-                                                  'gehrd_lwork'), (a1,))
+    gehrd, gebal, gehrd_lwork = get_lapack_funcs(
+        ("gehrd", "gebal", "gehrd_lwork"), (a1,)
+    )
     ba, lo, hi, pivscale, info = gebal(a1, permute=0, overwrite_a=overwrite_a)
-    _check_info(info, 'gebal (hessenberg)', positive=False)
+    _check_info(info, "gebal (hessenberg)", positive=False)
     n = len(a1)
 
     lwork = _compute_lwork(gehrd_lwork, ba.shape[0], lo=lo, hi=hi)
 
     hq, tau, info = gehrd(ba, lo=lo, hi=hi, lwork=lwork, overwrite_a=1)
-    _check_info(info, 'gehrd (hessenberg)', positive=False)
+    _check_info(info, "gehrd (hessenberg)", positive=False)
     h = numpy.triu(hq, -1)
     if not calc_q:
         return h
 
     # use orghr/unghr to compute q
-    orghr, orghr_lwork = get_lapack_funcs(('orghr', 'orghr_lwork'), (a1,))
+    orghr, orghr_lwork = get_lapack_funcs(("orghr", "orghr_lwork"), (a1,))
     lwork = _compute_lwork(orghr_lwork, n, lo=lo, hi=hi)
 
     q, info = orghr(a=hq, tau=tau, lo=lo, hi=hi, lwork=lwork, overwrite_a=1)
-    _check_info(info, 'orghr (hessenberg)', positive=False)
+    _check_info(info, "orghr (hessenberg)", positive=False)
     return h, q
 
 
@@ -1367,22 +1561,25 @@ def cdf2rdf(w, v):
 
     # check dimensions
     if w.ndim < 1:
-        raise ValueError('expected w to be at least 1D')
+        raise ValueError("expected w to be at least 1D")
     if v.ndim < 2:
-        raise ValueError('expected v to be at least 2D')
+        raise ValueError("expected v to be at least 2D")
     if v.ndim != w.ndim + 1:
-        raise ValueError('expected eigenvectors array to have exactly one '
-                         'dimension more than eigenvalues array')
+        raise ValueError(
+            "expected eigenvectors array to have exactly one "
+            "dimension more than eigenvalues array"
+        )
 
     # check shapes
     n = w.shape[-1]
     M = w.shape[:-1]
     if v.shape[-2] != v.shape[-1]:
-        raise ValueError('expected v to be a square matrix or stacked square '
-                         'matrices: v.shape[-2] = v.shape[-1]')
+        raise ValueError(
+            "expected v to be a square matrix or stacked square "
+            "matrices: v.shape[-2] = v.shape[-1]"
+        )
     if v.shape[-1] != n:
-        raise ValueError('expected the same number of eigenvalues as '
-                         'eigenvectors')
+        raise ValueError("expected the same number of eigenvalues as " "eigenvectors")
 
     # get indices for each first pair of complex eigenvalues
     complex_mask = iscomplex(w)
@@ -1390,7 +1587,7 @@ def cdf2rdf(w, v):
 
     # check if all complex eigenvalues have conjugate pairs
     if not (n_complex % 2 == 0).all():
-        raise ValueError('expected complex-conjugate pairs of eigenvalues')
+        raise ValueError("expected complex-conjugate pairs of eigenvalues")
 
     # find complex indices
     idx = nonzero(complex_mask)
@@ -1424,6 +1621,6 @@ def cdf2rdf(w, v):
     u[stack_ind + (k, k)] = 0.5
 
     # multipy matrices v and u (equivalent to v @ u)
-    vr = einsum('...ij,...jk->...ik', v, u).real
+    vr = einsum("...ij,...jk->...ik", v, u).real
 
     return wr, vr

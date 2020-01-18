@@ -40,8 +40,9 @@ class Gear(Benchmark):
     def fun(self, x, *args):
         self.nfev += 1
 
-        return (1. / 6.931
-                - floor(x[0]) * floor(x[1]) / floor(x[2]) / floor(x[3])) ** 2
+        return (
+            1.0 / 6.931 - floor(x[0]) * floor(x[1]) / floor(x[2]) / floor(x[3])
+        ) ** 2
 
 
 class Giunta(Benchmark):
@@ -84,7 +85,7 @@ class Giunta(Benchmark):
         self.nfev += 1
 
         arg = 16 * x / 15.0 - 1
-        return 0.6 + sum(sin(arg) + sin(arg) ** 2 + sin(4 * arg) / 50.)
+        return 0.6 + sum(sin(arg) + sin(arg) ** 2 + sin(4 * arg) / 50.0)
 
 
 class GoldsteinPrice(Benchmark):
@@ -117,18 +118,23 @@ class GoldsteinPrice(Benchmark):
 
         self._bounds = list(zip([-2.0] * self.N, [2.0] * self.N))
 
-        self.global_optimum = [[0., -1.]]
+        self.global_optimum = [[0.0, -1.0]]
         self.fglob = 3.0
 
     def fun(self, x, *args):
         self.nfev += 1
 
-        a = (1 + (x[0] + x[1] + 1) ** 2
-             * (19 - 14 * x[0] + 3 * x[0] ** 2
-             - 14 * x[1] + 6 * x[0] * x[1] + 3 * x[1] ** 2))
-        b = (30 + (2 * x[0] - 3 * x[1]) ** 2
-             * (18 - 32 * x[0] + 12 * x[0] ** 2
-             + 48 * x[1] - 36 * x[0] * x[1] + 27 * x[1] ** 2))
+        a = 1 + (x[0] + x[1] + 1) ** 2 * (
+            19 - 14 * x[0] + 3 * x[0] ** 2 - 14 * x[1] + 6 * x[0] * x[1] + 3 * x[1] ** 2
+        )
+        b = 30 + (2 * x[0] - 3 * x[1]) ** 2 * (
+            18
+            - 32 * x[0]
+            + 12 * x[0] ** 2
+            + 48 * x[1]
+            - 36 * x[0] * x[1]
+            + 27 * x[1] ** 2
+        )
         return a * b
 
 
@@ -160,8 +166,7 @@ class Griewank(Benchmark):
     def __init__(self, dimensions=2):
         Benchmark.__init__(self, dimensions)
 
-        self._bounds = list(zip([-100.0] * self.N,
-                           [100.0] * self.N))
+        self._bounds = list(zip([-100.0] * self.N, [100.0] * self.N))
         self.custom_bounds = [(-50, 50), (-50, 50)]
 
         self.global_optimum = [[0 for _ in range(self.N)]]
@@ -171,7 +176,7 @@ class Griewank(Benchmark):
     def fun(self, x, *args):
         self.nfev += 1
 
-        i = arange(1., np.size(x) + 1.)
+        i = arange(1.0, np.size(x) + 1.0)
         return sum(x ** 2 / 4000) - prod(cos(x / sqrt(i))) + 1
 
 
@@ -217,8 +222,8 @@ class Gulf(Benchmark):
     def fun(self, x, *args):
         self.nfev += 1
 
-        m = 99.
-        i = arange(1., m + 1)
-        u = 25 + (-50 * log(i / 100.)) ** (2 / 3.)
-        vec = (exp(-((abs(u - x[1])) ** x[2] / x[0])) - i / 100.)
+        m = 99.0
+        i = arange(1.0, m + 1)
+        u = 25 + (-50 * log(i / 100.0)) ** (2 / 3.0)
+        vec = exp(-((abs(u - x[1])) ** x[2] / x[0])) - i / 100.0
         return sum(vec ** 2)

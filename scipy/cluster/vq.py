@@ -74,9 +74,9 @@ from scipy.spatial.distance import cdist
 
 from . import _vq
 
-__docformat__ = 'restructuredtext'
+__docformat__ = "restructuredtext"
 
-__all__ = ['whiten', 'vq', 'kmeans', 'kmeans2']
+__all__ = ["whiten", "vq", "kmeans", "kmeans2"]
 
 
 class ClusterError(Exception):
@@ -133,9 +133,11 @@ def whiten(obs, check_finite=True):
     zero_std_mask = std_dev == 0
     if zero_std_mask.any():
         std_dev[zero_std_mask] = 1.0
-        warnings.warn("Some columns have standard deviation zero. "
-                      "The values of these columns will not change.",
-                      RuntimeWarning)
+        warnings.warn(
+            "Some columns have standard deviation zero. "
+            "The values of these columns will not change.",
+            RuntimeWarning,
+        )
     return obs / std_dev
 
 
@@ -263,7 +265,7 @@ def py_vq(obs, code_book, check_finite=True):
 
 
 # py_vq2 was equivalent to py_vq
-py_vq2 = np.deprecate(py_vq, old_name='py_vq2', new_name='py_vq')
+py_vq2 = np.deprecate(py_vq, old_name="py_vq2", new_name="py_vq")
 
 
 def _kmeans(obs, guess, thresh=1e-5):
@@ -307,8 +309,9 @@ def _kmeans(obs, guess, thresh=1e-5):
         obs_code, distort = vq(obs, code_book, check_finite=False)
         prev_avg_dists.append(distort.mean(axis=-1))
         # recalc code_book as centroids of associated obs
-        code_book, has_members = _vq.update_cluster_means(obs, obs_code,
-                                                          code_book.shape[0])
+        code_book, has_members = _vq.update_cluster_means(
+            obs, obs_code, code_book.shape[0]
+        )
         code_book = code_book[has_members]
         diff = prev_avg_dists[0] - prev_avg_dists[1]
 
@@ -437,8 +440,7 @@ def kmeans(obs, k_or_guess, iter=20, thresh=1e-5, check_finite=True):
     if not np.isscalar(k_or_guess):
         guess = _asarray_validated(k_or_guess, check_finite=check_finite)
         if guess.size < 1:
-            raise ValueError("Asked for 0 clusters. Initial book was %s" %
-                             guess)
+            raise ValueError("Asked for 0 clusters. Initial book was %s" % guess)
         return _kmeans(obs, guess, thresh=thresh)
 
     # k_or_guess is a scalar, now verify that it's an integer
@@ -559,10 +561,13 @@ def _kpp(data, k):
             init[i, :] = data[np.random.randint(dims)]
 
         else:
-            D2 = np.array([min(
-                            [np.inner(init[j]-x, init[j]-x) for j in range(i)]
-                            ) for x in data])
-            probs = D2/D2.sum()
+            D2 = np.array(
+                [
+                    min([np.inner(init[j] - x, init[j] - x) for j in range(i)])
+                    for x in data
+                ]
+            )
+            probs = D2 / D2.sum()
             cumprobs = probs.cumsum()
             r = np.random.rand()
             init[i, :] = data[np.searchsorted(cumprobs, r)]
@@ -570,26 +575,31 @@ def _kpp(data, k):
     return init
 
 
-_valid_init_meth = {'random': _krandinit, 'points': _kpoints, '++': _kpp}
+_valid_init_meth = {"random": _krandinit, "points": _kpoints, "++": _kpp}
 
 
 def _missing_warn():
     """Print a warning when called."""
-    warnings.warn("One of the clusters is empty. "
-                  "Re-run kmeans with a different initialization.")
+    warnings.warn(
+        "One of the clusters is empty. "
+        "Re-run kmeans with a different initialization."
+    )
 
 
 def _missing_raise():
     """Raise a ClusterError when called."""
-    raise ClusterError("One of the clusters is empty. "
-                       "Re-run kmeans with a different initialization.")
+    raise ClusterError(
+        "One of the clusters is empty. "
+        "Re-run kmeans with a different initialization."
+    )
 
 
-_valid_miss_meth = {'warn': _missing_warn, 'raise': _missing_raise}
+_valid_miss_meth = {"warn": _missing_warn, "raise": _missing_raise}
 
 
-def kmeans2(data, k, iter=10, thresh=1e-5, minit='random',
-            missing='warn', check_finite=True):
+def kmeans2(
+    data, k, iter=10, thresh=1e-5, minit="random", missing="warn", check_finite=True
+):
     """
     Classify a set of observations into k clusters using the k-means algorithm.
 
@@ -704,8 +714,7 @@ def kmeans2(data, k, iter=10, thresh=1e-5, minit='random',
 
     """
     if int(iter) < 1:
-        raise ValueError("Invalid iter (%s), "
-                         "must be a positive integer." % iter)
+        raise ValueError("Invalid iter (%s), " "must be a positive integer." % iter)
     try:
         miss_meth = _valid_miss_meth[missing]
     except KeyError:
@@ -723,7 +732,7 @@ def kmeans2(data, k, iter=10, thresh=1e-5, minit='random',
         raise ValueError("Empty input is not supported.")
 
     # If k is not a single value, it should be compatible with data's shape
-    if minit == 'matrix' or not np.isscalar(k):
+    if minit == "matrix" or not np.isscalar(k):
         code_book = np.array(k, copy=True)
         if data.ndim != code_book.ndim:
             raise ValueError("k array doesn't match data rank")
@@ -734,8 +743,9 @@ def kmeans2(data, k, iter=10, thresh=1e-5, minit='random',
         nc = int(k)
 
         if nc < 1:
-            raise ValueError("Cannot ask kmeans2 for %d clusters"
-                             " (k was %s)" % (nc, k))
+            raise ValueError(
+                "Cannot ask kmeans2 for %d clusters" " (k was %s)" % (nc, k)
+            )
         elif nc != k:
             warnings.warn("k was not an integer, was converted.")
 

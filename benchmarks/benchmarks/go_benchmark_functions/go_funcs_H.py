@@ -43,7 +43,7 @@ class Hansen(Benchmark):
     def fun(self, x, *args):
         self.nfev += 1
 
-        i = arange(5.)
+        i = arange(5.0)
         a = (i + 1) * cos(i * x[0] + i + 1)
         b = (i + 1) * cos((i + 2) * x[1] + i + 1)
 
@@ -100,17 +100,20 @@ class Hartmann3(Benchmark):
         self.global_optimum = [[0.11461292, 0.55564907, 0.85254697]]
         self.fglob = -3.8627821478
 
-        self.a = asarray([[3.0, 10., 30.],
-                          [0.1, 10., 35.],
-                          [3.0, 10., 30.],
-                          [0.1, 10., 35.]])
+        self.a = asarray(
+            [[3.0, 10.0, 30.0], [0.1, 10.0, 35.0], [3.0, 10.0, 30.0], [0.1, 10.0, 35.0]]
+        )
 
-        self.p = asarray([[0.3689, 0.1170, 0.2673],
-                          [0.4699, 0.4387, 0.7470],
-                          [0.1091, 0.8732, 0.5547],
-                          [0.03815, 0.5743, 0.8828]])
+        self.p = asarray(
+            [
+                [0.3689, 0.1170, 0.2673],
+                [0.4699, 0.4387, 0.7470],
+                [0.1091, 0.8732, 0.5547],
+                [0.03815, 0.5743, 0.8828],
+            ]
+        )
 
-        self.c = asarray([1., 1.2, 3., 3.2])
+        self.c = asarray([1.0, 1.2, 3.0, 3.2])
 
     def fun(self, x, *args):
         self.nfev += 1
@@ -181,20 +184,29 @@ class Hartmann6(Benchmark):
 
         self._bounds = list(zip([0.0] * self.N, [1.0] * self.N))
 
-        self.global_optimum = [[0.20168952, 0.15001069, 0.47687398, 0.27533243,
-                                0.31165162, 0.65730054]]
+        self.global_optimum = [
+            [0.20168952, 0.15001069, 0.47687398, 0.27533243, 0.31165162, 0.65730054]
+        ]
 
         self.fglob = -3.32236801141551
 
-        self.a = asarray([[10., 3., 17., 3.5, 1.7, 8.],
-                          [0.05, 10., 17., 0.1, 8., 14.],
-                          [3., 3.5, 1.7, 10., 17., 8.],
-                          [17., 8., 0.05, 10., 0.1, 14.]])
+        self.a = asarray(
+            [
+                [10.0, 3.0, 17.0, 3.5, 1.7, 8.0],
+                [0.05, 10.0, 17.0, 0.1, 8.0, 14.0],
+                [3.0, 3.5, 1.7, 10.0, 17.0, 8.0],
+                [17.0, 8.0, 0.05, 10.0, 0.1, 14.0],
+            ]
+        )
 
-        self.p = asarray([[0.1312, 0.1696, 0.5569, 0.0124, 0.8283, 0.5886],
-                          [0.2329, 0.4135, 0.8307, 0.3736, 0.1004, 0.9991],
-                          [0.2348, 0.1451, 0.3522, 0.2883, 0.3047, 0.665],
-                          [0.4047, 0.8828, 0.8732, 0.5743, 0.1091, 0.0381]])
+        self.p = asarray(
+            [
+                [0.1312, 0.1696, 0.5569, 0.0124, 0.8283, 0.5886],
+                [0.2329, 0.4135, 0.8307, 0.3736, 0.1004, 0.9991],
+                [0.2348, 0.1451, 0.3522, 0.2883, 0.3047, 0.665],
+                [0.4047, 0.8828, 0.8732, 0.5743, 0.1091, 0.0381],
+            ]
+        )
 
         self.c = asarray([1.0, 1.2, 3.0, 3.2])
 
@@ -243,7 +255,7 @@ class HelicalValley(Benchmark):
     def __init__(self, dimensions=3):
         Benchmark.__init__(self, dimensions)
 
-        self._bounds = list(zip([-10.] * self.N, [10.] * self.N))
+        self._bounds = list(zip([-10.0] * self.N, [10.0] * self.N))
 
         self.global_optimum = [[1.0, 0.0, 0.0]]
         self.fglob = 0.0
@@ -252,7 +264,7 @@ class HelicalValley(Benchmark):
         self.nfev += 1
 
         r = sqrt(x[0] ** 2 + x[1] ** 2)
-        theta = 1 / (2. * pi) * arctan2(x[1], x[0])
+        theta = 1 / (2.0 * pi) * arctan2(x[1], x[0])
 
         return x[2] ** 2 + 100 * ((x[2] - 10 * theta) ** 2 + (r - 1) ** 2)
 
@@ -282,7 +294,7 @@ class HimmelBlau(Benchmark):
     def __init__(self, dimensions=2):
         Benchmark.__init__(self, dimensions)
 
-        self._bounds = list(zip([-5.] * self.N, [5.] * self.N))
+        self._bounds = list(zip([-5.0] * self.N, [5.0] * self.N))
 
         self.global_optimum = [[3.0, 2.0]]
         self.fglob = 0.0
@@ -324,17 +336,20 @@ class HolderTable(Benchmark):
 
         self._bounds = list(zip([-10.0] * self.N, [10.0] * self.N))
 
-        self.global_optimum = [(8.055023472141116, 9.664590028909654),
-                               (-8.055023472141116, 9.664590028909654),
-                               (8.055023472141116, -9.664590028909654),
-                               (-8.055023472141116, -9.664590028909654)]
+        self.global_optimum = [
+            (8.055023472141116, 9.664590028909654),
+            (-8.055023472141116, 9.664590028909654),
+            (8.055023472141116, -9.664590028909654),
+            (-8.055023472141116, -9.664590028909654),
+        ]
         self.fglob = -19.20850256788675
 
     def fun(self, x, *args):
         self.nfev += 1
 
-        return -abs(sin(x[0]) * cos(x[1])
-                    * exp(abs(1 - sqrt(x[0] ** 2 + x[1] ** 2) / pi)))
+        return -abs(
+            sin(x[0]) * cos(x[1]) * exp(abs(1 - sqrt(x[0] ** 2 + x[1] ** 2) / pi))
+        )
 
 
 class Hosaki(Benchmark):
@@ -363,7 +378,7 @@ class Hosaki(Benchmark):
     def __init__(self, dimensions=2):
         Benchmark.__init__(self, dimensions)
 
-        self._bounds = ([0., 5.], [0., 6.])
+        self._bounds = ([0.0, 5.0], [0.0, 6.0])
         self.custom_bounds = [(0, 5), (0, 5)]
 
         self.global_optimum = [[4, 2]]
@@ -372,6 +387,5 @@ class Hosaki(Benchmark):
     def fun(self, x, *args):
         self.nfev += 1
 
-        val = (1 - 8 * x[0] + 7 * x[0] ** 2 - 7 / 3. * x[0] ** 3
-               + 0.25 * x[0] ** 4)
+        val = 1 - 8 * x[0] + 7 * x[0] ** 2 - 7 / 3.0 * x[0] ** 3 + 0.25 * x[0] ** 4
         return val * x[1] ** 2 * exp(-x[1])

@@ -17,7 +17,7 @@ import scipy
 from . import _voronoi
 from scipy.spatial import cKDTree
 
-__all__ = ['SphericalVoronoi']
+__all__ = ["SphericalVoronoi"]
 
 
 class SphericalVoronoi:
@@ -128,15 +128,18 @@ class SphericalVoronoi:
     >>> plt.show()
 
     """
+
     def __init__(self, points, radius=1, center=None, threshold=1e-06):
 
         if radius is None:
-            radius = 1.
-            warnings.warn('`radius` is `None`. '
-                          'This will raise an error in a future version. '
-                          'Please provide a floating point number '
-                          '(i.e. `radius=1`).',
-                          DeprecationWarning)
+            radius = 1.0
+            warnings.warn(
+                "`radius` is `None`. "
+                "This will raise an error in a future version. "
+                "Please provide a floating point number "
+                "(i.e. `radius=1`).",
+                DeprecationWarning,
+            )
 
         self.points = points
         self.radius = radius
@@ -148,8 +151,9 @@ class SphericalVoronoi:
             self.center = np.array(center)
 
         # test degenerate input
-        self._rank = np.linalg.matrix_rank(self.points - self.center,
-                                           tol=self.threshold * self.radius)
+        self._rank = np.linalg.matrix_rank(
+            self.points - self.center, tol=self.threshold * self.radius
+        )
         if self._rank <= 1:
             raise ValueError("Rank of input points must be at least 2")
 
@@ -197,10 +201,14 @@ class SphericalVoronoi:
         invb = np.argsort(np.roll(indices, 1))
 
         n = len(self.points)
-        regions = np.vstack([invf,            # forward neighbor
-                             [n] * n,         # north pole
-                             invb,            # backward neighbor
-                             [n + 1] * n]).T  # south pole
+        regions = np.vstack(
+            [
+                invf,  # forward neighbor
+                [n] * n,  # north pole
+                invb,  # backward neighbor
+                [n + 1] * n,
+            ]
+        ).T  # south pole
 
         self.regions = [list(region) for region in regions]
         self.vertices = vertices + self.center
@@ -231,15 +239,17 @@ class SphericalVoronoi:
         # for 3D input point_indices will have shape: (6N-12,)
         point_indices = self._tri.simplices.ravel()
         # for 3D input indices will have shape: (6N-12,)
-        indices = np.argsort(point_indices, kind='mergesort')
+        indices = np.argsort(point_indices, kind="mergesort")
         # for 3D input flattened_groups will have shape: (6N-12,)
         flattened_groups = tri_indices[indices].astype(np.intp)
         # intervals will have shape: (N+1,)
         intervals = np.cumsum(np.bincount(point_indices + 1))
 
         # split flattened groups to get nested list of unsorted regions
-        groups = [list(flattened_groups[intervals[i]:intervals[i + 1]])
-                  for i in range(len(intervals) - 1)]
+        groups = [
+            list(flattened_groups[intervals[i] : intervals[i + 1]])
+            for i in range(len(intervals) - 1)
+        ]
         self.regions = groups
 
     def sort_vertices_of_regions(self):

@@ -53,12 +53,13 @@ def upfirdn_naive(x, h, up=1, down=1):
     h = np.asarray(h)
     out = np.zeros(len(x) * up, x.dtype)
     out[::up] = x
-    out = np.convolve(h, out)[::down][:_output_len(len(h), len(x), up, down)]
+    out = np.convolve(h, out)[::down][: _output_len(len(h), len(x), up, down)]
     return out
 
 
 class UpFIRDnCase(object):
     """Test _UpFIRDn object"""
+
     def __init__(self, up, down, h, x_dtype):
         self.up = up
         self.down = down
@@ -90,8 +91,7 @@ class UpFIRDnCase(object):
             self.scrub(x, axis=axis)
 
     def scrub(self, x, axis=-1):
-        yr = np.apply_along_axis(upfirdn_naive, axis, x,
-                                 self.h, self.up, self.down)
+        yr = np.apply_along_axis(upfirdn_naive, axis, x, self.h, self.up, self.down)
         y = upfirdn(self.h, x, self.up, self.down, axis=axis)
         dtypes = (self.h.dtype, x.dtype)
         if all(d == np.complex64 for d in dtypes):
@@ -108,7 +108,6 @@ class UpFIRDnCase(object):
 
 
 class TestUpfirdn(object):
-
     def test_valid_input(self):
         assert_raises(ValueError, upfirdn, [1], [1], 1, 0)  # up or down < 1
         assert_raises(ValueError, upfirdn, [], [1], 1, 1)  # h.ndim != 1
@@ -127,17 +126,17 @@ class TestUpfirdn(object):
                 x += 1j * random_state.randn(size)
 
             for down in down_factors:
-                h = firwin(31, 1. / down, window='hamming')
+                h = firwin(31, 1.0 / down, window="hamming")
                 yl = lfilter(h, 1.0, x)[::down]
                 y = upfirdn(h, x, up=1, down=down)
-                assert_allclose(yl, y[:yl.size], atol=1e-7, rtol=1e-7)
+                assert_allclose(yl, y[: yl.size], atol=1e-7, rtol=1e-7)
 
     def test_vs_naive(self):
         tests = []
         try_types = (int, np.float32, np.complex64, float, complex)
 
         # Simple combinations of factors
-        for x_dtype, h in product(try_types, (1., 1j)):
+        for x_dtype, h in product(try_types, (1.0, 1j)):
             tests.append(UpFIRDnCase(1, 1, h, x_dtype))
             tests.append(UpFIRDnCase(2, 2, h, x_dtype))
             tests.append(UpFIRDnCase(3, 2, h, x_dtype))
@@ -177,21 +176,22 @@ class TestUpfirdn(object):
 
         return tests
 
-    @pytest.mark.parametrize('mode', _upfirdn_modes)
+    @pytest.mark.parametrize("mode", _upfirdn_modes)
     def test_extensions(self, mode):
         """Test vs. manually computed results for modes not in numpy's pad."""
         x = np.array([1, 2, 3, 1], dtype=float)
         npre, npost = 6, 6
         y = _pad_test(x, npre=npre, npost=npost, mode=mode)
-        if mode == 'antisymmetric':
+        if mode == "antisymmetric":
             y_expected = np.asarray(
-                [3, 1, -1, -3, -2, -1, 1, 2, 3, 1, -1, -3, -2, -1, 1, 2])
-        elif mode == 'antireflect':
+                [3, 1, -1, -3, -2, -1, 1, 2, 3, 1, -1, -3, -2, -1, 1, 2]
+            )
+        elif mode == "antireflect":
+            y_expected = np.asarray([1, 2, 3, 1, -1, 0, 1, 2, 3, 1, -1, 0, 1, 2, 3, 1])
+        elif mode == "smooth":
             y_expected = np.asarray(
-                [1, 2, 3, 1, -1, 0, 1, 2, 3, 1, -1, 0, 1, 2, 3, 1])
-        elif mode == 'smooth':
-            y_expected = np.asarray(
-                [-5, -4, -3, -2, -1, 0, 1, 2, 3, 1, -1, -3, -5, -7, -9, -11])
+                [-5, -4, -3, -2, -1, 0, 1, 2, 3, 1, -1, -3, -5, -7, -9, -11]
+            )
         elif mode == "line":
             lin_slope = (x[-1] - x[0]) / (len(x) - 1)
             left = x[0] + np.arange(-npre, 0, 1) * lin_slope
@@ -202,13 +202,13 @@ class TestUpfirdn(object):
         assert_allclose(y, y_expected)
 
     @pytest.mark.parametrize(
-        'size, h_len, mode, dtype',
+        "size, h_len, mode, dtype",
         product(
             [8],
             [4, 5, 26],  # include cases with h_len > 2*size
             _upfirdn_modes,
             [np.float32, np.float64, np.complex64, np.complex128],
-        )
+        ),
     )
     def test_modes(self, size, h_len, mode, dtype):
         random_state = np.random.RandomState(5)
@@ -220,12 +220,12 @@ class TestUpfirdn(object):
         y = upfirdn(h, x, up=1, down=1, mode=mode)
         # expected result: pad the input, filter with zero padding, then crop
         npad = h_len - 1
-        if mode in ['antisymmetric', 'antireflect', 'smooth', 'line']:
+        if mode in ["antisymmetric", "antireflect", "smooth", "line"]:
             # use _pad_test test function for modes not supported by np.pad.
             xpad = _pad_test(x, npre=npad, npost=npad, mode=mode)
         else:
             xpad = np.pad(x, npad, mode=mode)
-        ypad = upfirdn(h, xpad, up=1, down=1, mode='constant')
+        ypad = upfirdn(h, xpad, up=1, down=1, mode="constant")
         y_expected = ypad[npad:-npad]
 
         atol = rtol = np.finfo(dtype).eps * 1e2

@@ -2,14 +2,19 @@ from __future__ import division, print_function, absolute_import
 
 from scipy import stats
 import numpy as np
-from numpy.testing import (assert_almost_equal, assert_,
-    assert_array_almost_equal, assert_array_almost_equal_nulp, assert_allclose)
+from numpy.testing import (
+    assert_almost_equal,
+    assert_,
+    assert_array_almost_equal,
+    assert_array_almost_equal_nulp,
+    assert_allclose,
+)
 import pytest
 from pytest import raises as assert_raises
 
 
 def test_kde_1d():
-    #some basic tests comparing to normal distribution
+    # some basic tests comparing to normal distribution
     np.random.seed(8765678)
     n_basesample = 500
     xn = np.random.randn(n_basesample)
@@ -20,12 +25,12 @@ def test_kde_1d():
     gkde = stats.gaussian_kde(xn)
 
     # evaluate the density function for the kde for some points
-    xs = np.linspace(-7,7,501)
+    xs = np.linspace(-7, 7, 501)
     kdepdf = gkde.evaluate(xs)
     normpdf = stats.norm.pdf(xs, loc=xnmean, scale=xnstd)
     intervall = xs[1] - xs[0]
 
-    assert_(np.sum((kdepdf - normpdf)**2)*intervall < 0.01)
+    assert_(np.sum((kdepdf - normpdf) ** 2) * intervall < 0.01)
     prob1 = gkde.integrate_box_1d(xnmean, np.inf)
     prob2 = gkde.integrate_box_1d(-np.inf, xnmean)
     assert_almost_equal(prob1, 0.5, decimal=1)
@@ -33,31 +38,35 @@ def test_kde_1d():
     assert_almost_equal(gkde.integrate_box(xnmean, np.inf), prob1, decimal=13)
     assert_almost_equal(gkde.integrate_box(-np.inf, xnmean), prob2, decimal=13)
 
-    assert_almost_equal(gkde.integrate_kde(gkde),
-                        (kdepdf**2).sum()*intervall, decimal=2)
-    assert_almost_equal(gkde.integrate_gaussian(xnmean, xnstd**2),
-                        (kdepdf*normpdf).sum()*intervall, decimal=2)
+    assert_almost_equal(
+        gkde.integrate_kde(gkde), (kdepdf ** 2).sum() * intervall, decimal=2
+    )
+    assert_almost_equal(
+        gkde.integrate_gaussian(xnmean, xnstd ** 2),
+        (kdepdf * normpdf).sum() * intervall,
+        decimal=2,
+    )
 
 
 def test_kde_1d_weighted():
-    #some basic tests comparing to normal distribution
+    # some basic tests comparing to normal distribution
     np.random.seed(8765678)
     n_basesample = 500
     xn = np.random.randn(n_basesample)
     wn = np.random.rand(n_basesample)
     xnmean = np.average(xn, weights=wn)
-    xnstd = np.sqrt(np.average((xn-xnmean)**2, weights=wn))
+    xnstd = np.sqrt(np.average((xn - xnmean) ** 2, weights=wn))
 
     # get kde for original sample
     gkde = stats.gaussian_kde(xn, weights=wn)
 
     # evaluate the density function for the kde for some points
-    xs = np.linspace(-7,7,501)
+    xs = np.linspace(-7, 7, 501)
     kdepdf = gkde.evaluate(xs)
     normpdf = stats.norm.pdf(xs, loc=xnmean, scale=xnstd)
     intervall = xs[1] - xs[0]
 
-    assert_(np.sum((kdepdf - normpdf)**2)*intervall < 0.01)
+    assert_(np.sum((kdepdf - normpdf) ** 2) * intervall < 0.01)
     prob1 = gkde.integrate_box_1d(xnmean, np.inf)
     prob2 = gkde.integrate_box_1d(-np.inf, xnmean)
     assert_almost_equal(prob1, 0.5, decimal=1)
@@ -65,15 +74,19 @@ def test_kde_1d_weighted():
     assert_almost_equal(gkde.integrate_box(xnmean, np.inf), prob1, decimal=13)
     assert_almost_equal(gkde.integrate_box(-np.inf, xnmean), prob2, decimal=13)
 
-    assert_almost_equal(gkde.integrate_kde(gkde),
-                        (kdepdf**2).sum()*intervall, decimal=2)
-    assert_almost_equal(gkde.integrate_gaussian(xnmean, xnstd**2),
-                        (kdepdf*normpdf).sum()*intervall, decimal=2)
+    assert_almost_equal(
+        gkde.integrate_kde(gkde), (kdepdf ** 2).sum() * intervall, decimal=2
+    )
+    assert_almost_equal(
+        gkde.integrate_gaussian(xnmean, xnstd ** 2),
+        (kdepdf * normpdf).sum() * intervall,
+        decimal=2,
+    )
 
 
 @pytest.mark.slow
 def test_kde_2d():
-    #some basic tests comparing to normal distribution
+    # some basic tests comparing to normal distribution
     np.random.seed(8765678)
     n_basesample = 500
 
@@ -92,10 +105,12 @@ def test_kde_2d():
     kdepdf = gkde.evaluate(grid_coords)
     kdepdf = kdepdf.reshape(500, 500)
 
-    normpdf = stats.multivariate_normal.pdf(np.dstack([x, y]), mean=mean, cov=covariance)
+    normpdf = stats.multivariate_normal.pdf(
+        np.dstack([x, y]), mean=mean, cov=covariance
+    )
     intervall = y.ravel()[1] - y.ravel()[0]
 
-    assert_(np.sum((kdepdf - normpdf)**2) * (intervall**2) < 0.01)
+    assert_(np.sum((kdepdf - normpdf) ** 2) * (intervall ** 2) < 0.01)
 
     small = -1e100
     large = 1e100
@@ -104,15 +119,19 @@ def test_kde_2d():
 
     assert_almost_equal(prob1, 0.5, decimal=1)
     assert_almost_equal(prob2, 0.5, decimal=1)
-    assert_almost_equal(gkde.integrate_kde(gkde),
-                        (kdepdf**2).sum()*(intervall**2), decimal=2)
-    assert_almost_equal(gkde.integrate_gaussian(mean, covariance),
-                        (kdepdf*normpdf).sum()*(intervall**2), decimal=2)
+    assert_almost_equal(
+        gkde.integrate_kde(gkde), (kdepdf ** 2).sum() * (intervall ** 2), decimal=2
+    )
+    assert_almost_equal(
+        gkde.integrate_gaussian(mean, covariance),
+        (kdepdf * normpdf).sum() * (intervall ** 2),
+        decimal=2,
+    )
 
 
 @pytest.mark.slow
 def test_kde_2d_weighted():
-    #some basic tests comparing to normal distribution
+    # some basic tests comparing to normal distribution
     np.random.seed(8765678)
     n_basesample = 500
 
@@ -132,10 +151,12 @@ def test_kde_2d_weighted():
     kdepdf = gkde.evaluate(grid_coords)
     kdepdf = kdepdf.reshape(500, 500)
 
-    normpdf = stats.multivariate_normal.pdf(np.dstack([x, y]), mean=mean, cov=covariance)
+    normpdf = stats.multivariate_normal.pdf(
+        np.dstack([x, y]), mean=mean, cov=covariance
+    )
     intervall = y.ravel()[1] - y.ravel()[0]
 
-    assert_(np.sum((kdepdf - normpdf)**2) * (intervall**2) < 0.01)
+    assert_(np.sum((kdepdf - normpdf) ** 2) * (intervall ** 2) < 0.01)
 
     small = -1e100
     large = 1e100
@@ -144,16 +165,20 @@ def test_kde_2d_weighted():
 
     assert_almost_equal(prob1, 0.5, decimal=1)
     assert_almost_equal(prob2, 0.5, decimal=1)
-    assert_almost_equal(gkde.integrate_kde(gkde),
-                        (kdepdf**2).sum()*(intervall**2), decimal=2)
-    assert_almost_equal(gkde.integrate_gaussian(mean, covariance),
-                        (kdepdf*normpdf).sum()*(intervall**2), decimal=2)
+    assert_almost_equal(
+        gkde.integrate_kde(gkde), (kdepdf ** 2).sum() * (intervall ** 2), decimal=2
+    )
+    assert_almost_equal(
+        gkde.integrate_gaussian(mean, covariance),
+        (kdepdf * normpdf).sum() * (intervall ** 2),
+        decimal=2,
+    )
 
 
 def test_kde_bandwidth_method():
     def scotts_factor(kde_obj):
         """Same as default, just check that it works."""
-        return np.power(kde_obj.n, -1./(kde_obj.d+4))
+        return np.power(kde_obj.n, -1.0 / (kde_obj.d + 4))
 
     np.random.seed(8765678)
     n_basesample = 50
@@ -166,20 +191,20 @@ def test_kde_bandwidth_method():
     # Supply a scalar
     gkde3 = stats.gaussian_kde(xn, bw_method=gkde.factor)
 
-    xs = np.linspace(-7,7,51)
+    xs = np.linspace(-7, 7, 51)
     kdepdf = gkde.evaluate(xs)
     kdepdf2 = gkde2.evaluate(xs)
     assert_almost_equal(kdepdf, kdepdf2)
     kdepdf3 = gkde3.evaluate(xs)
     assert_almost_equal(kdepdf, kdepdf3)
 
-    assert_raises(ValueError, stats.gaussian_kde, xn, bw_method='wrongstring')
+    assert_raises(ValueError, stats.gaussian_kde, xn, bw_method="wrongstring")
 
 
 def test_kde_bandwidth_method_weighted():
     def scotts_factor(kde_obj):
         """Same as default, just check that it works."""
-        return np.power(kde_obj.neff, -1./(kde_obj.d+4))
+        return np.power(kde_obj.neff, -1.0 / (kde_obj.d + 4))
 
     np.random.seed(8765678)
     n_basesample = 50
@@ -192,19 +217,20 @@ def test_kde_bandwidth_method_weighted():
     # Supply a scalar
     gkde3 = stats.gaussian_kde(xn, bw_method=gkde.factor)
 
-    xs = np.linspace(-7,7,51)
+    xs = np.linspace(-7, 7, 51)
     kdepdf = gkde.evaluate(xs)
     kdepdf2 = gkde2.evaluate(xs)
     assert_almost_equal(kdepdf, kdepdf2)
     kdepdf3 = gkde3.evaluate(xs)
     assert_almost_equal(kdepdf, kdepdf3)
 
-    assert_raises(ValueError, stats.gaussian_kde, xn, bw_method='wrongstring')
+    assert_raises(ValueError, stats.gaussian_kde, xn, bw_method="wrongstring")
 
 
 # Subclasses that should stay working (extracted from various sources).
 # Unfortunately the earlier design of gaussian_kde made it necessary for users
 # to create these kinds of subclasses, or call _compute_covariance() directly.
+
 
 class _kde_subclass1(stats.gaussian_kde):
     def __init__(self, dataset):
@@ -283,7 +309,7 @@ def test_gaussian_kde_covariance_caching():
     # Set the bandwidth, then reset it to the default.
     kde = stats.gaussian_kde(x1)
     kde.set_bandwidth(bw_method=0.5)
-    kde.set_bandwidth(bw_method='scott')
+    kde.set_bandwidth(bw_method="scott")
     y2 = kde(xs)
 
     assert_array_almost_equal(y_expected, y2, decimal=7)
@@ -304,7 +330,7 @@ def test_gaussian_kde_monkeypatch():
     y1 = kde(xs)
 
     # The new saner version.
-    kde2 = stats.gaussian_kde(x1, bw_method='silverman')
+    kde2 = stats.gaussian_kde(x1, bw_method="silverman")
     y2 = kde2(xs)
 
     assert_array_almost_equal_nulp(y1, y2, nulp=10)
@@ -387,8 +413,7 @@ def test_weights_integer():
     pdf_f = stats.gaussian_kde(values, weights=np.float64(weights))
 
     xn = [0.3, 11, 88]
-    assert_allclose(pdf_i.evaluate(xn),
-                    pdf_f.evaluate(xn), atol=1e-14, rtol=1e-14)
+    assert_allclose(pdf_i.evaluate(xn), pdf_f.evaluate(xn), atol=1e-14, rtol=1e-14)
 
 
 def test_seed():
@@ -398,9 +423,7 @@ def test_seed():
         # The results should be different without using seed
         samp1 = gkde_trail.resample(n_sample)
         samp2 = gkde_trail.resample(n_sample)
-        assert_raises(
-            AssertionError, assert_allclose, samp1, samp2, atol=1e-13
-        )
+        assert_raises(AssertionError, assert_allclose, samp1, samp2, atol=1e-13)
         # Use integer seed
         seed = 831
         samp1 = gkde_trail.resample(n_sample, seed=seed)
@@ -424,7 +447,7 @@ def test_seed():
     gkde_1d_weighted = stats.gaussian_kde(xn_1d, weights=wn)
     test_seed_sub(gkde_1d_weighted)
 
-    # Test 2D case 
+    # Test 2D case
     mean = np.array([1.0, 3.0])
     covariance = np.array([[1.0, 2.0], [2.0, 6.0]])
     xn_2d = np.random.multivariate_normal(mean, covariance, size=n_basesample).T

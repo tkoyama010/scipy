@@ -4,8 +4,7 @@ Discrete Fourier Transforms - basic.py
 # Created by Pearu Peterson, August,September 2002
 from __future__ import division, print_function, absolute_import
 
-__all__ = ['fft','ifft','fftn','ifftn','rfft','irfft',
-           'fft2','ifft2']
+__all__ = ["fft", "ifft", "fftn", "ifftn", "rfft", "irfft", "fft2", "ifft2"]
 
 from scipy.fft import _pocketfft
 from .helper import _good_shape
@@ -369,7 +368,7 @@ def ifftn(x, shape=None, axes=None, overwrite_x=False):
     return _pocketfft.ifftn(x, shape, axes, None, overwrite_x)
 
 
-def fft2(x, shape=None, axes=(-2,-1), overwrite_x=False):
+def fft2(x, shape=None, axes=(-2, -1), overwrite_x=False):
     """
     2-D discrete Fourier transform.
 
@@ -381,10 +380,10 @@ def fft2(x, shape=None, axes=(-2,-1), overwrite_x=False):
     fftn : for detailed information.
 
     """
-    return fftn(x,shape,axes,overwrite_x)
+    return fftn(x, shape, axes, overwrite_x)
 
 
-def ifft2(x, shape=None, axes=(-2,-1), overwrite_x=False):
+def ifft2(x, shape=None, axes=(-2, -1), overwrite_x=False):
     """
     2-D discrete inverse Fourier transform of real or complex sequence.
 
@@ -398,4 +397,4 @@ def ifft2(x, shape=None, axes=(-2,-1), overwrite_x=False):
     fft2, ifft
 
     """
-    return ifftn(x,shape,axes,overwrite_x)
+    return ifftn(x, shape, axes, overwrite_x)

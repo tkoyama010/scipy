@@ -5,7 +5,7 @@ from __future__ import division, print_function, absolute_import
 
 __docformat__ = "restructuredtext en"
 
-__all__ = ['find', 'tril', 'triu']
+__all__ = ["find", "tril", "triu"]
 
 
 from .coo import coo_matrix

@@ -81,17 +81,39 @@ Convolutions (:mod:`scipy.fftpack.convolve`)
 from __future__ import division, print_function, absolute_import
 
 
-__all__ = ['fft','ifft','fftn','ifftn','rfft','irfft',
-           'fft2','ifft2',
-           'diff',
-           'tilbert','itilbert','hilbert','ihilbert',
-           'sc_diff','cs_diff','cc_diff','ss_diff',
-           'shift',
-           'fftfreq', 'rfftfreq',
-           'fftshift', 'ifftshift',
-           'next_fast_len',
-           'dct', 'idct', 'dst', 'idst', 'dctn', 'idctn', 'dstn', 'idstn'
-           ]
+__all__ = [
+    "fft",
+    "ifft",
+    "fftn",
+    "ifftn",
+    "rfft",
+    "irfft",
+    "fft2",
+    "ifft2",
+    "diff",
+    "tilbert",
+    "itilbert",
+    "hilbert",
+    "ihilbert",
+    "sc_diff",
+    "cs_diff",
+    "cc_diff",
+    "ss_diff",
+    "shift",
+    "fftfreq",
+    "rfftfreq",
+    "fftshift",
+    "ifftshift",
+    "next_fast_len",
+    "dct",
+    "idct",
+    "dst",
+    "idst",
+    "dctn",
+    "idctn",
+    "dstn",
+    "idstn",
+]
 
 from .basic import *
 from .pseudo_diffs import *
@@ -99,5 +121,6 @@ from .helper import *
 from .realtransforms import *
 
 from scipy._lib._testutils import PytestTester
+
 test = PytestTester(__name__)
 del PytestTester

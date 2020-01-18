@@ -10,9 +10,8 @@ except ImportError:
 
 
 class HierarchyLinkage(Benchmark):
-    params = ['single', 'complete', 'average', 'weighted', 'centroid',
-              'median', 'ward']
-    param_names = ['method']
+    params = ["single", "complete", "average", "weighted", "centroid", "median", "ward"]
+    param_names = ["method"]
 
     def __init__(self):
         rnd = np.random.RandomState(0)
@@ -24,7 +23,7 @@ class HierarchyLinkage(Benchmark):
 
 class KMeans(Benchmark):
     params = [2, 10, 50]
-    param_names = ['k']
+    param_names = ["k"]
 
     def __init__(self):
         rnd = np.random.RandomState(0)
@@ -38,8 +37,8 @@ class KMeans(Benchmark):
 
 
 class VQ(Benchmark):
-    params = [[2, 10, 50], ['float32', 'float64', 'float128']]
-    param_names = ['k', 'dtype']
+    params = [[2, 10, 50], ["float32", "float64", "float128"]]
+    param_names = ["k", "dtype"]
 
     def __init__(self):
         rnd = np.random.RandomState(0)

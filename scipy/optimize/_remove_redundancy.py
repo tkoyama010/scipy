@@ -84,10 +84,12 @@ def _remove_zero_rows(A, b):
     message = ""
     i_zero = _row_count(A) == 0
     A = A[np.logical_not(i_zero), :]
-    if not(np.allclose(b[i_zero], 0)):
+    if not (np.allclose(b[i_zero], 0)):
         status = 2
-        message = "There is a zero row in A_eq with a nonzero corresponding " \
-                  "entry in b_eq. The problem is infeasible."
+        message = (
+            "There is a zero row in A_eq with a nonzero corresponding "
+            "entry in b_eq. The problem is infeasible."
+        )
     b = b[np.logical_not(i_zero)]
     return A, b, status, message
 
@@ -95,12 +97,11 @@ def _remove_zero_rows(A, b):
 def bg_update_dense(plu, perm_r, v, j):
     LU, p = plu
 
-    u = scipy.linalg.solve_triangular(LU, v[perm_r], lower=True,
-                                      unit_diagonal=True)
-    LU[:j+1, j] = u[:j+1]
-    l = u[j+1:]
+    u = scipy.linalg.solve_triangular(LU, v[perm_r], lower=True, unit_diagonal=True)
+    LU[: j + 1, j] = u[: j + 1]
+    l = u[j + 1 :]
     piv = LU[j, j]
-    LU[j+1:, j] += (l/piv)
+    LU[j + 1 :, j] += l / piv
     return LU, p
 
 
@@ -140,11 +141,13 @@ def _remove_redundancy_dense(A, rhs):
     tolprimal = 1e-8
     status = 0
     message = ""
-    inconsistent = ("There is a linear combination of rows of A_eq that "
-                    "results in zero, suggesting a redundant constraint. "
-                    "However the same linear combination of b_eq is "
-                    "nonzero, suggesting that the constraints conflict "
-                    "and the problem is infeasible.")
+    inconsistent = (
+        "There is a linear combination of rows of A_eq that "
+        "results in zero, suggesting a redundant constraint. "
+        "However the same linear combination of b_eq is "
+        "nonzero, suggesting that the constraints conflict "
+        "and the problem is infeasible."
+    )
     A, rhs, status, message = _remove_zero_rows(A, rhs)
 
     if status != 0:
@@ -152,12 +155,12 @@ def _remove_redundancy_dense(A, rhs):
 
     m, n = A.shape
 
-    v = list(range(m))      # Artificial column indices.
-    b = list(v)             # Basis column indices.
+    v = list(range(m))  # Artificial column indices.
+    b = list(v)  # Basis column indices.
     # This is better as a list than a set because column order of basis matrix
     # needs to be consistent.
-    k = set(range(m, m+n))  # Structural column indices.
-    d = []                  # Indices of dependent rows
+    k = set(range(m, m + n))  # Structural column indices.
+    d = []  # Indices of dependent rows
     lu = None
     perm_r = None
 
@@ -186,11 +189,11 @@ def _remove_redundancy_dense(A, rhs):
 
         e[i] = 1
         if i > 0:
-            e[i-1] = 0
+            e[i - 1] = 0
 
         try:  # fails for i==0 and any time it gets ill-conditioned
-            j = b[i-1]
-            lu = bg_update_dense(lu, perm_r, A[:, j], i-1)
+            j = b[i - 1]
+            lu = bg_update_dense(lu, perm_r, A[:, j], i - 1)
         except Exception:
             lu = scipy.linalg.lu_factor(B)
             LU, p = lu
@@ -201,13 +204,13 @@ def _remove_redundancy_dense(A, rhs):
         pi = scipy.linalg.lu_solve(lu, e, trans=1)
 
         # not efficient, but this is not the time sink...
-        js = np.array(list(k-set(b)))
+        js = np.array(list(k - set(b)))
         batch = 50
 
         # This is a tiny bit faster than looping over columns indivually,
         # like for j in js: if abs(A[:,j].transpose().dot(pi)) > tolapiv:
         for j_index in range(0, len(js), batch):
-            j_indices = js[np.arange(j_index, min(j_index+batch, len(js)))]
+            j_indices = js[np.arange(j_index, min(j_index + batch, len(js)))]
 
             c = abs(A[:, j_indices].transpose().dot(pi))
             if (c > tolapiv).any():
@@ -218,7 +221,7 @@ def _remove_redundancy_dense(A, rhs):
         else:
             bibar = pi.T.dot(rhs.reshape(-1, 1))
             bnorm = np.linalg.norm(rhs)
-            if abs(bibar)/(1+bnorm) > tolprimal:  # inconsistent
+            if abs(bibar) / (1 + bnorm) > tolprimal:  # inconsistent
                 status = 2
                 message = inconsistent
                 return A_orig, rhs, status, message
@@ -267,11 +270,13 @@ def _remove_redundancy_sparse(A, rhs):
     tolprimal = 1e-8
     status = 0
     message = ""
-    inconsistent = ("There is a linear combination of rows of A_eq that "
-                    "results in zero, suggesting a redundant constraint. "
-                    "However the same linear combination of b_eq is "
-                    "nonzero, suggesting that the constraints conflict "
-                    "and the problem is infeasible.")
+    inconsistent = (
+        "There is a linear combination of rows of A_eq that "
+        "results in zero, suggesting a redundant constraint. "
+        "However the same linear combination of b_eq is "
+        "nonzero, suggesting that the constraints conflict "
+        "and the problem is infeasible."
+    )
     A, rhs, status, message = _remove_zero_rows(A, rhs)
 
     if status != 0:
@@ -279,12 +284,12 @@ def _remove_redundancy_sparse(A, rhs):
 
     m, n = A.shape
 
-    v = list(range(m))      # Artificial column indices.
-    b = list(v)             # Basis column indices.
+    v = list(range(m))  # Artificial column indices.
+    b = list(v)  # Basis column indices.
     # This is better as a list than a set because column order of basis matrix
     # needs to be consistent.
-    k = set(range(m, m+n))  # Structural column indices.
-    d = []                  # Indices of dependent rows
+    k = set(range(m, m + n))  # Structural column indices.
+    d = []  # Indices of dependent rows
 
     A_orig = A
     A = scipy.sparse.hstack((scipy.sparse.eye(m), A)).tocsc()
@@ -315,11 +320,11 @@ def _remove_redundancy_sparse(A, rhs):
 
         e[i] = 1
         if i > 0:
-            e[i-1] = 0
+            e[i - 1] = 0
 
         pi = scipy.sparse.linalg.spsolve(B.transpose(), e).reshape(-1, 1)
 
-        js = list(k-set(b))  # not efficient, but this is not the time sink...
+        js = list(k - set(b))  # not efficient, but this is not the time sink...
 
         # Due to overhead, it tends to be faster (for problems tested) to
         # compute the full matrix-vector product rather than individual
@@ -345,7 +350,7 @@ def _remove_redundancy_sparse(A, rhs):
         else:
             bibar = pi.T.dot(rhs.reshape(-1, 1))
             bnorm = np.linalg.norm(rhs)
-            if abs(bibar)/(1 + bnorm) > tolprimal:
+            if abs(bibar) / (1 + bnorm) > tolprimal:
                 status = 2
                 message = inconsistent
                 return A_orig, rhs, status, message
@@ -423,20 +428,24 @@ def _remove_redundancy(A, b):
         eligibleRows = np.abs(v) > tol * 10e6
         if not np.any(eligibleRows) or np.any(np.abs(v.dot(A)) > tol):
             status = 4
-            message = ("Due to numerical issues, redundant equality "
-                       "constraints could not be removed automatically. "
-                       "Try providing your constraint matrices as sparse "
-                       "matrices to activate sparse presolve, try turning "
-                       "off redundancy removal, or try turning off presolve "
-                       "altogether.")
+            message = (
+                "Due to numerical issues, redundant equality "
+                "constraints could not be removed automatically. "
+                "Try providing your constraint matrices as sparse "
+                "matrices to activate sparse presolve, try turning "
+                "off redundancy removal, or try turning off presolve "
+                "altogether."
+            )
             break
         if np.any(np.abs(v.dot(b)) > tol * 100):  # factor of 100 to fix 10038 and 10349
             status = 2
-            message = ("There is a linear combination of rows of A_eq that "
-                       "results in zero, suggesting a redundant constraint. "
-                       "However the same linear combination of b_eq is "
-                       "nonzero, suggesting that the constraints conflict "
-                       "and the problem is infeasible.")
+            message = (
+                "There is a linear combination of rows of A_eq that "
+                "results in zero, suggesting a redundant constraint. "
+                "However the same linear combination of b_eq is "
+                "nonzero, suggesting that the constraints conflict "
+                "and the problem is infeasible."
+            )
             break
 
         i_remove = _get_densest(A, eligibleRows)

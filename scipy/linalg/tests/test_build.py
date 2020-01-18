@@ -16,7 +16,7 @@ from scipy.linalg import _flapack as flapack
 
 class FindDependenciesLdd:
     def __init__(self):
-        self.cmd = ['ldd']
+        self.cmd = ["ldd"]
 
         try:
             st = call(self.cmd, stdout=PIPE, stderr=PIPE)
@@ -45,13 +45,16 @@ class FindDependenciesLdd:
 
 
 class TestF77Mismatch(object):
-    @pytest.mark.skipif(not(sys.platform[:5] == 'linux'),
-                        reason="Skipping fortran compiler mismatch on non Linux platform")
+    @pytest.mark.skipif(
+        not (sys.platform[:5] == "linux"),
+        reason="Skipping fortran compiler mismatch on non Linux platform",
+    )
     def test_lapack(self):
         f = FindDependenciesLdd()
-        deps = f.grep_dependencies(flapack.__file__,
-                                   ['libg2c', 'libgfortran'])
-        assert_(not (len(deps) > 1),
-"""Both g77 and gfortran runtimes linked in scipy.linalg.flapack ! This is
+        deps = f.grep_dependencies(flapack.__file__, ["libg2c", "libgfortran"])
+        assert_(
+            not (len(deps) > 1),
+            """Both g77 and gfortran runtimes linked in scipy.linalg.flapack ! This is
 likely to cause random crashes and wrong results. See numpy INSTALL.rst.txt for
-more information.""")
+more information.""",
+        )

@@ -25,7 +25,7 @@ if __name__ == "__main__":
     # full or fast test suite?
     try:
         testmode = sys.argv[1]
-        if testmode not in ('fast', 'full'):
+        if testmode not in ("fast", "full"):
             raise IndexError
     except IndexError:
         raise ValueError("Usage: validate.py {full|fast} < logfile.")
@@ -33,11 +33,12 @@ if __name__ == "__main__":
     # fetch the expected number of tests
     # these numbers are for 10d5dfe8b7
     # XXX: this should probably track the commit hash or commit date
-    expected_size = {'full': 11000,
-                     'fast': 10000}
+    expected_size = {"full": 11000, "fast": 10000}
 
     # read in the log, parse for the pytest printout
-    r1 = re.compile("(?P<num_failed>\d+) failed, (?P<num_passed>\d+) passed,.* in (?P<time>\d+\S+)")
+    r1 = re.compile(
+        "(?P<num_failed>\d+) failed, (?P<num_passed>\d+) passed,.* in (?P<time>\d+\S+)"
+    )
     r2 = re.compile("(?P<num_passed>\d+) passed,.* in (?P<time>\d+\S+)")
 
     found_it = False
@@ -53,9 +54,9 @@ if __name__ == "__main__":
             break
 
     if found_it:
-        passed = int(m.group('num_passed'))
+        passed = int(m.group("num_passed"))
         try:
-            failed = int(m.group('num_failed'))
+            failed = int(m.group("num_failed"))
         except IndexError:
             failed = 0
 
@@ -72,5 +73,5 @@ if __name__ == "__main__":
         else:
             sys.exit(0)
     else:
-        print('*** Test runner validation errored: did the run really finish?')
+        print("*** Test runner validation errored: did the run really finish?")
         sys.exit(-1)

@@ -4,12 +4,12 @@ import glob
 from distutils.dep_util import newer
 
 
-__all__ = ['needs_g77_abi_wrapper', 'get_g77_abi_wrappers']
+__all__ = ["needs_g77_abi_wrapper", "get_g77_abi_wrappers"]
 
 
 def uses_mkl(info):
     r_mkl = re.compile("mkl")
-    libraries = info.get('libraries', '')
+    libraries = info.get("libraries", "")
     for library in libraries:
         if r_mkl.search(library):
             return True
@@ -25,6 +25,7 @@ def needs_g77_abi_wrapper(info):
         needs_wrapper = uses_mkl(info)
     return needs_wrapper
 
+
 def get_g77_abi_wrappers(info):
     """
     Returns file names of source files containing Fortran ABI wrapper
@@ -35,11 +36,9 @@ def get_g77_abi_wrappers(info):
     path = os.path.abspath(os.path.dirname(__file__))
     if needs_g77_abi_wrapper(info):
         wrapper_sources += [
-            os.path.join(path, 'src', 'wrap_g77_abi_f.f'),
-            os.path.join(path, 'src', 'wrap_g77_abi_c.c'),
+            os.path.join(path, "src", "wrap_g77_abi_f.f"),
+            os.path.join(path, "src", "wrap_g77_abi_c.c"),
         ]
     else:
-        wrapper_sources += [
-            os.path.join(path, 'src', 'wrap_dummy_g77_abi.f'),
-        ]
+        wrapper_sources += [os.path.join(path, "src", "wrap_dummy_g77_abi.f")]
     return wrapper_sources

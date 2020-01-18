@@ -11,29 +11,25 @@ from scipy.special._ufuncs import _sf_error_test_function
 
 _sf_error_code_map = {
     # skip 'ok'
-    'singular': 1,
-    'underflow': 2,
-    'overflow': 3,
-    'slow': 4,
-    'loss': 5,
-    'no_result': 6,
-    'domain': 7,
-    'arg': 8,
-    'other': 9
+    "singular": 1,
+    "underflow": 2,
+    "overflow": 3,
+    "slow": 4,
+    "loss": 5,
+    "no_result": 6,
+    "domain": 7,
+    "arg": 8,
+    "other": 9,
 }
 
-_sf_error_actions = [
-    'ignore',
-    'warn',
-    'raise'
-]
+_sf_error_actions = ["ignore", "warn", "raise"]
 
 
 def _check_action(fun, args, action):
-    if action == 'warn':
+    if action == "warn":
         with pytest.warns(sc.SpecialFunctionWarning):
             fun(*args)
-    elif action == 'raise':
+    elif action == "raise":
         with assert_raises(sc.SpecialFunctionError):
             fun(*args)
     else:
@@ -63,16 +59,16 @@ def test_seterr():
                 geterr_olderr.pop(category)
                 newerr.pop(category)
                 assert_(geterr_olderr == newerr)
-                _check_action(_sf_error_test_function,
-                              (_sf_error_code_map[category],),
-                               action)
+                _check_action(
+                    _sf_error_test_function, (_sf_error_code_map[category],), action
+                )
     finally:
         sc.seterr(**entry_err)
 
 
 def test_errstate_pyx_basic():
     olderr = sc.geterr()
-    with sc.errstate(singular='raise'):
+    with sc.errstate(singular="raise"):
         with assert_raises(sc.SpecialFunctionError):
             sc.loggamma(0)
     assert_equal(olderr, sc.geterr())
@@ -80,7 +76,7 @@ def test_errstate_pyx_basic():
 
 def test_errstate_c_basic():
     olderr = sc.geterr()
-    with sc.errstate(domain='raise'):
+    with sc.errstate(domain="raise"):
         with assert_raises(sc.SpecialFunctionError):
             sc.spence(-1)
     assert_equal(olderr, sc.geterr())
@@ -88,7 +84,7 @@ def test_errstate_c_basic():
 
 def test_errstate_cpp_basic():
     olderr = sc.geterr()
-    with sc.errstate(underflow='raise'):
+    with sc.errstate(underflow="raise"):
         with assert_raises(sc.SpecialFunctionError):
             sc.wrightomega(-1000)
     assert_equal(olderr, sc.geterr())
@@ -99,15 +95,15 @@ def test_errstate():
         for action in _sf_error_actions:
             olderr = sc.geterr()
             with sc.errstate(**{category: action}):
-                _check_action(_sf_error_test_function,
-                              (_sf_error_code_map[category],),
-                              action)
+                _check_action(
+                    _sf_error_test_function, (_sf_error_code_map[category],), action
+                )
             assert_equal(olderr, sc.geterr())
 
 
 def test_errstate_all_but_one():
     olderr = sc.geterr()
-    with sc.errstate(all='raise', singular='ignore'):
+    with sc.errstate(all="raise", singular="ignore"):
         sc.gammaln(0)
         with assert_raises(sc.SpecialFunctionError):
             sc.spence(-1.0)

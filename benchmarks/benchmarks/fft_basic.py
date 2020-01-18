@@ -10,8 +10,10 @@ import os
 
 import scipy.fftpack
 import numpy.fft
+
 try:
     import scipy.fft as scipy_fft
+
     has_scipy_fft = True
 except ImportError:
     scipy_fft = {}
@@ -22,23 +24,25 @@ from .common import Benchmark
 try:
     import pyfftw.interfaces.numpy_fft as pyfftw_fft
     import pyfftw
+
     pyfftw.interfaces.cache.enable()
     has_pyfftw = True
 except ImportError:
     pyfftw_fft = {}
     has_pyfftw = False
 
+
 class PyfftwBackend:
     """Backend for pyfftw"""
-    __ua_domain__ = 'numpy.scipy.fft'
+
+    __ua_domain__ = "numpy.scipy.fft"
 
     @staticmethod
     def __ua_function__(method, args, kwargs):
-        kwargs.pop('overwrite_x', None)
+        kwargs.pop("overwrite_x", None)
 
         fn = getattr(pyfftw_fft, method.__name__, None)
-        return (NotImplemented if fn is None
-                else fn(*args, **kwargs))
+        return NotImplemented if fn is None else fn(*args, **kwargs)
 
 
 def random(size):
@@ -49,9 +53,9 @@ def direct_dft(x):
     x = asarray(x)
     n = len(x)
     y = zeros(n, dtype=cdouble)
-    w = -arange(n)*(2j*pi/n)
+    w = -arange(n) * (2j * pi / n)
     for i in range(n):
-        y[i] = dot(exp(i*w), x)
+        y[i] = dot(exp(i * w), x)
     return y
 
 
@@ -59,20 +63,20 @@ def direct_idft(x):
     x = asarray(x)
     n = len(x)
     y = zeros(n, dtype=cdouble)
-    w = arange(n)*(2j*pi/n)
+    w = arange(n) * (2j * pi / n)
     for i in range(n):
-        y[i] = dot(exp(i*w), x)/n
+        y[i] = dot(exp(i * w), x) / n
     return y
 
 
 def get_module(mod_name):
     module_map = {
-        'scipy.fftpack': scipy.fftpack,
-        'scipy.fft': scipy_fft,
-        'numpy.fft': numpy.fft
+        "scipy.fftpack": scipy.fftpack,
+        "scipy.fft": scipy_fft,
+        "numpy.fft": numpy.fft,
     }
 
-    if not has_scipy_fft and mod_name == 'scipy.fft':
+    if not has_scipy_fft and mod_name == "scipy.fft":
         raise NotImplementedError
 
     return module_map[mod_name]
@@ -80,21 +84,23 @@ def get_module(mod_name):
 
 class Fft(Benchmark):
     params = [
-        [100, 256, 313, 512, 1000, 1024, 2048, 2048*2, 2048*4],
-        ['real', 'cmplx'],
-        ['scipy.fftpack', 'scipy.fft', 'numpy.fft']
+        [100, 256, 313, 512, 1000, 1024, 2048, 2048 * 2, 2048 * 4],
+        ["real", "cmplx"],
+        ["scipy.fftpack", "scipy.fft", "numpy.fft"],
     ]
-    param_names = ['size', 'type', 'module']
+    param_names = ["size", "type", "module"]
 
     def setup(self, size, cmplx, module):
-        if cmplx == 'cmplx':
-            self.x = random([size]).astype(cdouble)+random([size]).astype(cdouble)*1j
+        if cmplx == "cmplx":
+            self.x = (
+                random([size]).astype(cdouble) + random([size]).astype(cdouble) * 1j
+            )
         else:
             self.x = random([size]).astype(double)
 
         module = get_module(module)
-        self.fft = getattr(module, 'fft')
-        self.ifft = getattr(module, 'ifft')
+        self.fft = getattr(module, "fft")
+        self.ifft = getattr(module, "ifft")
 
     def time_fft(self, size, cmplx, module):
         self.fft(self.x)
@@ -105,14 +111,20 @@ class Fft(Benchmark):
 
 class NextFastLen(Benchmark):
     params = [
-        [12, 13,  # small ones
-         1021, 1024,  # 2 ** 10 and a prime
-         16381, 16384,  # 2 ** 14 and a prime
-         262139, 262144,  # 2 ** 17 and a prime
-         999983, 1048576,  # 2 ** 20 and a prime
-         ],
+        [
+            12,
+            13,  # small ones
+            1021,
+            1024,  # 2 ** 10 and a prime
+            16381,
+            16384,  # 2 ** 14 and a prime
+            262139,
+            262144,  # 2 ** 17 and a prime
+            999983,
+            1048576,  # 2 ** 20 and a prime
+        ]
     ]
-    param_names = ['size']
+    param_names = ["size"]
 
     def setup(self, size):
         if not has_scipy_fft:
@@ -127,17 +139,17 @@ class NextFastLen(Benchmark):
 
 class RFft(Benchmark):
     params = [
-        [100, 256, 313, 512, 1000, 1024, 2048, 2048*2, 2048*4],
-        ['scipy.fftpack', 'scipy.fft', 'numpy.fft']
+        [100, 256, 313, 512, 1000, 1024, 2048, 2048 * 2, 2048 * 4],
+        ["scipy.fftpack", "scipy.fft", "numpy.fft"],
     ]
-    param_names = ['size', 'module']
+    param_names = ["size", "module"]
 
     def setup(self, size, module):
         self.x = random([size]).astype(double)
 
         module = get_module(module)
-        self.rfft = getattr(module, 'rfft')
-        self.irfft = getattr(module, 'irfft')
+        self.rfft = getattr(module, "rfft")
+        self.irfft = getattr(module, "irfft")
 
         self.y = self.rfft(self.x)
 
@@ -151,16 +163,16 @@ class RFft(Benchmark):
 class RealTransforms1D(Benchmark):
     params = [
         [75, 100, 135, 256, 313, 512, 675, 1024, 2025, 2048],
-        ['I', 'II', 'III', 'IV'],
-        ['scipy.fftpack', 'scipy.fft']
+        ["I", "II", "III", "IV"],
+        ["scipy.fftpack", "scipy.fft"],
     ]
-    param_names = ['size', 'type', 'module']
+    param_names = ["size", "type", "module"]
 
     def setup(self, size, type, module):
         module = get_module(module)
-        self.dct = getattr(module, 'dct')
-        self.dst = getattr(module, 'dst')
-        self.type = {'I':1, 'II':2, 'III':3, 'IV':4}[type]
+        self.dct = getattr(module, "dct")
+        self.dst = getattr(module, "dst")
+        self.type = {"I": 1, "II": 2, "III": 3, "IV": 4}[type]
 
         # The "logical" transform size should be smooth, which for dct/dst
         # type 1 is offset by -1/+1 respectively
@@ -184,20 +196,20 @@ class RealTransforms1D(Benchmark):
 class Fftn(Benchmark):
     params = [
         ["100x100", "313x100", "1000x100", "256x256", "512x512"],
-        ['real', 'cmplx'],
-        ['scipy.fftpack', 'scipy.fft', 'numpy.fft']
+        ["real", "cmplx"],
+        ["scipy.fftpack", "scipy.fft", "numpy.fft"],
     ]
-    param_names = ['size', 'type', 'module']
+    param_names = ["size", "type", "module"]
 
     def setup(self, size, cmplx, module):
         size = list(map(int, size.split("x")))
 
-        if cmplx != 'cmplx':
+        if cmplx != "cmplx":
             self.x = random(size).astype(double)
         else:
-            self.x = random(size).astype(cdouble)+random(size).astype(cdouble)*1j
+            self.x = random(size).astype(cdouble) + random(size).astype(cdouble) * 1j
 
-        self.fftn = getattr(get_module(module), 'fftn')
+        self.fftn = getattr(get_module(module), "fftn")
 
     def time_fftn(self, size, cmplx, module):
         self.fftn(self.x)
@@ -205,27 +217,27 @@ class Fftn(Benchmark):
 
 class RealTransformsND(Benchmark):
     params = [
-        ['75x75', '100x100', '135x135', '313x363', '1000x100', '256x256'],
-        ['I', 'II', 'III', 'IV'],
-        ['scipy.fftpack', 'scipy.fft']
+        ["75x75", "100x100", "135x135", "313x363", "1000x100", "256x256"],
+        ["I", "II", "III", "IV"],
+        ["scipy.fftpack", "scipy.fft"],
     ]
-    param_names = ['size', 'type', 'module']
+    param_names = ["size", "type", "module"]
 
     def setup(self, size, type, module):
-        self.dctn = getattr(get_module(module), 'dctn')
-        self.dstn = getattr(get_module(module), 'dstn')
-        self.type = {'I':1, 'II':2, 'III':3, 'IV':4}[type]
+        self.dctn = getattr(get_module(module), "dctn")
+        self.dstn = getattr(get_module(module), "dstn")
+        self.type = {"I": 1, "II": 2, "III": 3, "IV": 4}[type]
 
         # The "logical" transform size should be smooth, which for dct/dst
         # type 1 is offset by -1/+1 respectively
 
-        size = list(map(int, size.split('x')))
+        size = list(map(int, size.split("x")))
         if self.type == 1:
             size = (s + 1 for s in size)
 
         self.x = random(size).astype(double)
         if self.type == 1:
-            self.x_dst = self.x[:-2,:-2].copy()
+            self.x_dst = self.x[:-2, :-2].copy()
 
     def time_dctn(self, size, type, module):
         self.dctn(self.x, self.type)
@@ -237,33 +249,38 @@ class RealTransformsND(Benchmark):
 
 class FftBackends(Benchmark):
     params = [
-        [100, 256, 313, 512, 1000, 1024, 2048, 2048*2, 2048*4],
-        ['real', 'cmplx'],
-        ['pocketfft', 'pyfftw', 'numpy', 'direct']
+        [100, 256, 313, 512, 1000, 1024, 2048, 2048 * 2, 2048 * 4],
+        ["real", "cmplx"],
+        ["pocketfft", "pyfftw", "numpy", "direct"],
     ]
-    param_names = ['size', 'type', 'backend']
+    param_names = ["size", "type", "backend"]
 
     def setup(self, size, cmplx, backend):
         import scipy.fft
-        if cmplx == 'cmplx':
-            self.x = random([size]).astype(cdouble)+random([size]).astype(cdouble)*1j
+
+        if cmplx == "cmplx":
+            self.x = (
+                random([size]).astype(cdouble) + random([size]).astype(cdouble) * 1j
+            )
         else:
             self.x = random([size]).astype(double)
 
         self.fft = scipy.fft.fft
         self.ifft = scipy.fft.ifft
 
-        if backend == 'pocketfft':
-            scipy.fft.set_global_backend('scipy')
-        elif backend == 'pyfftw':
+        if backend == "pocketfft":
+            scipy.fft.set_global_backend("scipy")
+        elif backend == "pyfftw":
             if not has_pyfftw:
                 raise NotImplementedError
             scipy.fft.set_global_backend(PyfftwBackend)
-        elif backend == 'numpy':
+        elif backend == "numpy":
             from scipy.fft._debug_backends import NumPyBackend
+
             scipy.fft.set_global_backend(NumPyBackend)
-        elif backend == 'direct':
+        elif backend == "direct":
             import scipy.fft._pocketfft
+
             self.fft = scipy.fft._pocketfft.fft
             self.ifft = scipy.fft._pocketfft.ifft
 
@@ -277,34 +294,37 @@ class FftBackends(Benchmark):
 class FftnBackends(Benchmark):
     params = [
         ["100x100", "313x100", "1000x100", "256x256", "512x512"],
-        ['real', 'cmplx'],
-        ['pocketfft', 'pyfftw', 'numpy', 'direct']
+        ["real", "cmplx"],
+        ["pocketfft", "pyfftw", "numpy", "direct"],
     ]
-    param_names = ['size', 'type', 'backend']
+    param_names = ["size", "type", "backend"]
 
     def setup(self, size, cmplx, backend):
         import scipy.fft
+
         size = list(map(int, size.split("x")))
 
-        if cmplx == 'cmplx':
-            self.x = random(size).astype(double)+random(size).astype(double)*1j
+        if cmplx == "cmplx":
+            self.x = random(size).astype(double) + random(size).astype(double) * 1j
         else:
             self.x = random(size).astype(double)
 
         self.fftn = scipy.fft.fftn
         self.ifftn = scipy.fft.ifftn
 
-        if backend == 'pocketfft':
-            scipy.fft.set_global_backend('scipy')
-        elif backend == 'pyfftw':
+        if backend == "pocketfft":
+            scipy.fft.set_global_backend("scipy")
+        elif backend == "pyfftw":
             if not has_pyfftw:
                 raise NotImplementedError
             scipy.fft.set_global_backend(PyfftwBackend)
-        elif backend == 'numpy':
+        elif backend == "numpy":
             from scipy.fft._debug_backends import NumPyBackend
+
             scipy.fft.set_global_backend(NumPyBackend)
-        elif backend == 'direct':
+        elif backend == "direct":
             import scipy.fft._pocketfft
+
             self.fftn = scipy.fft._pocketfft.fftn
             self.ifftn = scipy.fft._pocketfft.ifftn
 
@@ -317,21 +337,23 @@ class FftnBackends(Benchmark):
 
 class FftThreading(Benchmark):
     params = [
-        ['100x100', '1000x100', '256x256', '512x512'],
+        ["100x100", "1000x100", "256x256", "512x512"],
         [1, 8, 32, 100],
-        ['workers', 'threading']
+        ["workers", "threading"],
     ]
-    param_names = ['size', 'num_transforms', 'method']
+    param_names = ["size", "num_transforms", "method"]
 
     def setup(self, size, num_transforms, method):
         if not has_scipy_fft:
             raise NotImplementedError
 
         size = list(map(int, size.split("x")))
-        self.xs = [(random(size)+1j*random(size)).astype(np.complex128)
-                   for _ in range(num_transforms)]
+        self.xs = [
+            (random(size) + 1j * random(size)).astype(np.complex128)
+            for _ in range(num_transforms)
+        ]
 
-        if method == 'threading':
+        if method == "threading":
             self.pool = futures.ThreadPoolExecutor(os.cpu_count())
 
     def map_thread(self, func):
@@ -341,14 +363,14 @@ class FftThreading(Benchmark):
         futures.wait(f)
 
     def time_fft(self, size, num_transforms, method):
-        if method == 'threading':
+        if method == "threading":
             self.map_thread(scipy_fft.fft)
         else:
             for x in self.xs:
                 scipy_fft.fft(x, workers=-1)
 
     def time_fftn(self, size, num_transforms, method):
-        if method == 'threading':
+        if method == "threading":
             self.map_thread(scipy_fft.fftn)
         else:
             for x in self.xs:

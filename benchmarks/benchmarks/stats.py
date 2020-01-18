@@ -11,24 +11,23 @@ except ImportError:
 
 from .common import Benchmark
 
+
 class Anderson_KSamp(Benchmark):
     def setup(self, *args):
         self.rand = [np.random.normal(loc=i, size=1000) for i in range(3)]
 
     def time_anderson_ksamp(self):
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore', UserWarning)
+            warnings.simplefilter("ignore", UserWarning)
             stats.anderson_ksamp(self.rand)
 
 
 class CorrelationFunctions(Benchmark):
-    param_names = ['alternative']
-    params = [
-        ['two-sided', 'less', 'greater']
-    ]
+    param_names = ["alternative"]
+    params = [["two-sided", "less", "greater"]]
 
     def setup(self, mode):
-        a = np.random.rand(2,2) * 10
+        a = np.random.rand(2, 2) * 10
         self.a = a
 
     def time_fisher_exact(self, alternative):
@@ -54,54 +53,51 @@ class InferentialStats(Benchmark):
 
 
 class Distribution(Benchmark):
-    param_names = ['distribution', 'properties']
-    params = [
-        ['cauchy', 'gamma', 'beta'],
-        ['pdf', 'cdf', 'rvs', 'fit']
-    ]
+    param_names = ["distribution", "properties"]
+    params = [["cauchy", "gamma", "beta"], ["pdf", "cdf", "rvs", "fit"]]
 
     def setup(self, distribution, properties):
         np.random.seed(12345678)
         self.x = np.random.rand(100)
 
     def time_distribution(self, distribution, properties):
-        if distribution == 'gamma':
-            if properties == 'pdf':
+        if distribution == "gamma":
+            if properties == "pdf":
                 stats.gamma.pdf(self.x, a=5, loc=4, scale=10)
-            elif properties == 'cdf':
+            elif properties == "cdf":
                 stats.gamma.cdf(self.x, a=5, loc=4, scale=10)
-            elif properties == 'rvs':
+            elif properties == "rvs":
                 stats.gamma.rvs(size=1000, a=5, loc=4, scale=10)
-            elif properties == 'fit':
+            elif properties == "fit":
                 stats.gamma.fit(self.x, loc=4, scale=10)
-        elif distribution == 'cauchy':
-            if properties == 'pdf':
+        elif distribution == "cauchy":
+            if properties == "pdf":
                 stats.cauchy.pdf(self.x, loc=4, scale=10)
-            elif properties == 'cdf':
+            elif properties == "cdf":
                 stats.cauchy.cdf(self.x, loc=4, scale=10)
-            elif properties == 'rvs':
+            elif properties == "rvs":
                 stats.cauchy.rvs(size=1000, loc=4, scale=10)
-            elif properties == 'fit':
+            elif properties == "fit":
                 stats.cauchy.fit(self.x, loc=4, scale=10)
-        elif distribution == 'beta':
-            if properties == 'pdf':
+        elif distribution == "beta":
+            if properties == "pdf":
                 stats.beta.pdf(self.x, a=5, b=3, loc=4, scale=10)
-            elif properties == 'cdf':
+            elif properties == "cdf":
                 stats.beta.cdf(self.x, a=5, b=3, loc=4, scale=10)
-            elif properties == 'rvs':
+            elif properties == "rvs":
                 stats.beta.rvs(size=1000, a=5, b=3, loc=4, scale=10)
-            elif properties == 'fit':
+            elif properties == "fit":
                 stats.beta.fit(self.x, loc=4, scale=10)
 
     # Retain old benchmark results (remove this if changing the benchmark)
-    time_distribution.version = "fb22ae5386501008d945783921fe44aef3f82c1dafc40cddfaccaeec38b792b0"
+    time_distribution.version = (
+        "fb22ae5386501008d945783921fe44aef3f82c1dafc40cddfaccaeec38b792b0"
+    )
 
 
 class DescriptiveStats(Benchmark):
-    param_names = ['n_levels']
-    params = [
-        [10, 1000]
-    ]
+    param_names = ["n_levels"]
+    params = [[10, 1000]]
 
     def setup(self, n_levels):
         np.random.seed(12345678)
@@ -138,7 +134,7 @@ class GaussianKDE(Benchmark):
 
 
 class GroupSampling(Benchmark):
-    param_names = ['dim']
+    param_names = ["dim"]
     params = [[3, 10, 50, 200]]
 
     def setup(self, dim):

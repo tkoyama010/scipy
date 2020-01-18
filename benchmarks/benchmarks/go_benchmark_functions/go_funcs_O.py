@@ -46,19 +46,16 @@ class OddSquare(Benchmark):
     def __init__(self, dimensions=2):
         Benchmark.__init__(self, dimensions)
 
-        self._bounds = list(zip([-5.0 * pi] * self.N,
-                           [5.0 * pi] * self.N))
+        self._bounds = list(zip([-5.0 * pi] * self.N, [5.0 * pi] * self.N))
         self.custom_bounds = ([-2.0, 4.0], [-2.0, 4.0])
-        self.a = asarray([1, 1.3, 0.8, -0.4, -1.3, 1.6, -0.2, -0.6, 0.5, 1.4]
-                         * 2)
+        self.a = asarray([1, 1.3, 0.8, -0.4, -1.3, 1.6, -0.2, -0.6, 0.5, 1.4] * 2)
         self.global_optimum = [[1.0873320463871847, 1.3873320456818079]]
 
         self.fglob = -1.00846728102
 
     def fun(self, x, *args):
         self.nfev += 1
-        b = self.a[0: self.N]
+        b = self.a[0 : self.N]
         d = self.N * max((x - b) ** 2.0)
         h = sum((x - b) ** 2.0)
-        return (-exp(-d / (2.0 * pi)) * cos(pi * d)
-                * (1.0 + 0.02 * h / (d + 0.01)))
+        return -exp(-d / (2.0 * pi)) * cos(pi * d) * (1.0 + 0.02 * h / (d + 0.01))

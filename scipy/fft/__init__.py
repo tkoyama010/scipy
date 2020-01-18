@@ -74,47 +74,98 @@ Backend control
 from __future__ import division, print_function, absolute_import
 
 from ._basic import (
-    fft, ifft, fft2, ifft2, fftn, ifftn,
-    rfft, irfft, rfft2, irfft2, rfftn, irfftn,
-    hfft, ihfft, hfft2, ihfft2, hfftn, ihfftn)
+    fft,
+    ifft,
+    fft2,
+    ifft2,
+    fftn,
+    ifftn,
+    rfft,
+    irfft,
+    rfft2,
+    irfft2,
+    rfftn,
+    irfftn,
+    hfft,
+    ihfft,
+    hfft2,
+    ihfft2,
+    hfftn,
+    ihfftn,
+)
 from ._realtransforms import dct, idct, dst, idst, dctn, idctn, dstn, idstn
 from ._helper import next_fast_len
-from ._backend import (set_backend, skip_backend, set_global_backend,
-                       register_backend)
+from ._backend import set_backend, skip_backend, set_global_backend, register_backend
 from numpy.fft import fftfreq, rfftfreq, fftshift, ifftshift
 from ._pocketfft.helper import set_workers, get_workers
 
 __all__ = [
-    'fft', 'ifft', 'fft2','ifft2', 'fftn', 'ifftn',
-    'rfft', 'irfft', 'rfft2', 'irfft2', 'rfftn', 'irfftn',
-    'hfft', 'ihfft', 'hfft2', 'ihfft2', 'hfftn', 'ihfftn',
-    'fftfreq', 'rfftfreq', 'fftshift', 'ifftshift',
-    'next_fast_len',
-    'dct', 'idct', 'dst', 'idst', 'dctn', 'idctn', 'dstn', 'idstn',
-    'set_backend', 'skip_backend', 'set_global_backend', 'register_backend',
-    'get_workers', 'set_workers']
+    "fft",
+    "ifft",
+    "fft2",
+    "ifft2",
+    "fftn",
+    "ifftn",
+    "rfft",
+    "irfft",
+    "rfft2",
+    "irfft2",
+    "rfftn",
+    "irfftn",
+    "hfft",
+    "ihfft",
+    "hfft2",
+    "ihfft2",
+    "hfftn",
+    "ihfftn",
+    "fftfreq",
+    "rfftfreq",
+    "fftshift",
+    "ifftshift",
+    "next_fast_len",
+    "dct",
+    "idct",
+    "dst",
+    "idst",
+    "dctn",
+    "idctn",
+    "dstn",
+    "idstn",
+    "set_backend",
+    "skip_backend",
+    "set_global_backend",
+    "register_backend",
+    "get_workers",
+    "set_workers",
+]
 
 from numpy.dual import register_func
-for k in ['fft', 'ifft', 'fftn', 'ifftn', 'fft2', 'ifft2']:
+
+for k in ["fft", "ifft", "fftn", "ifftn", "fft2", "ifft2"]:
     register_func(k, eval(k))
 del k, register_func
 
 from scipy._lib._testutils import PytestTester
+
 test = PytestTester(__name__)
 del PytestTester
 
 
 # Hack to allow numpy.fft.fft to be called as scipy.fft
 import sys
+
+
 class _FFTModule(sys.modules[__name__].__class__):
     @staticmethod
     def __call__(*args, **kwargs):
         from scipy import _dep_fft
+
         return _dep_fft(*args, **kwargs)
 
 
 import os
-if os.environ.get('_SCIPY_BUILDING_DOC') != 'True':
+
+if os.environ.get("_SCIPY_BUILDING_DOC") != "True":
     sys.modules[__name__].__class__ = _FFTModule
 del os
 del _FFTModule

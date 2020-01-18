@@ -49,5 +49,5 @@ def test_modules_importable():
     # process. This is not necessarily true (esp on Python 2) if there
     # are import cycles present.
     for module in MODULES:
-        cmd = 'import {}'.format(module)
-        subprocess.check_call([sys.executable, '-c', cmd])
+        cmd = "import {}".format(module)
+        subprocess.check_call([sys.executable, "-c", cmd])

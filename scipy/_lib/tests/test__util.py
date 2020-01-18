@@ -21,8 +21,8 @@ def test__aligned_zeros():
         x = _aligned_zeros(shape, dtype, order, align=align)
         if align is None:
             align = np.dtype(dtype).alignment
-        assert_equal(x.__array_interface__['data'][0] % align, 0)
-        if hasattr(shape, '__len__'):
+        assert_equal(x.__array_interface__["data"][0] % align, 0)
+        if hasattr(shape, "__len__"):
             assert_equal(x.shape, shape, err_msg)
         else:
             assert_equal(x.shape, (shape,), err_msg)
@@ -59,8 +59,8 @@ def test_check_random_state():
     assert_equal(type(rsi), np.random.RandomState)
     rsi = check_random_state(None)
     assert_equal(type(rsi), np.random.RandomState)
-    assert_raises(ValueError, check_random_state, 'a')
-    if hasattr(np.random, 'Generator'):
+    assert_raises(ValueError, check_random_state, "a")
+    if hasattr(np.random, "Generator"):
         # np.random.Generator is only available in NumPy >= 1.17
         rg = np.random.Generator(np.random.PCG64())
         rsi = check_random_state(rg)
@@ -68,7 +68,7 @@ def test_check_random_state():
 
 
 def test_mapwrapper_serial():
-    in_arg = np.arange(10.)
+    in_arg = np.arange(10.0)
     out_arg = np.sin(in_arg)
 
     p = MapWrapper(1)
@@ -82,11 +82,12 @@ def test_mapwrapper_serial():
         p = MapWrapper(0)
 
 
-@pytest.mark.skipif(get_start_method() != 'fork',
-                    reason=('multiprocessing with spawn method is not'
-                            ' compatible with pytest.'))
+@pytest.mark.skipif(
+    get_start_method() != "fork",
+    reason=("multiprocessing with spawn method is not" " compatible with pytest."),
+)
 def test_mapwrapper_parallel():
-    in_arg = np.arange(10.)
+    in_arg = np.arange(10.0)
     out_arg = np.sin(in_arg)
 
     with MapWrapper(2) as p:
@@ -122,30 +123,30 @@ def test_mapwrapper_parallel():
 
 # get our custom ones and a few from the "import *" cases
 @pytest.mark.parametrize(
-    'key', ('fft', 'ifft', 'diag', 'arccos',
-            'randn', 'rand', 'array'))
+    "key", ("fft", "ifft", "diag", "arccos", "randn", "rand", "array")
+)
 def test_numpy_deprecation(key):
     """Test that 'from numpy import *' functions are deprecated."""
-    if key in ('fft', 'ifft', 'diag', 'arccos'):
-        arg = [1.0, 0.]
-    elif key == 'finfo':
+    if key in ("fft", "ifft", "diag", "arccos"):
+        arg = [1.0, 0.0]
+    elif key == "finfo":
         arg = float
     else:
         arg = 2
     func = getattr(scipy, key)
-    if key == 'fft':
-        match = r'scipy\.fft.*deprecated.*1.5.0.*'
+    if key == "fft":
+        match = r"scipy\.fft.*deprecated.*1.5.0.*"
     else:
-        match = r'scipy\.%s is deprecated.*2\.0\.0' % key
+        match = r"scipy\.%s is deprecated.*2\.0\.0" % key
     with deprecated_call(match=match) as dep:
         func(arg)  # deprecated
     # in case we catch more than one dep warning
     fnames = [os.path.splitext(d.filename)[0] for d in dep.list]
     basenames = [os.path.basename(fname) for fname in fnames]
-    assert 'test__util' in basenames
-    if key in ('rand', 'randn'):
+    assert "test__util" in basenames
+    if key in ("rand", "randn"):
         root = np.random
-    elif key in ('fft', 'ifft'):
+    elif key in ("fft", "ifft"):
         root = np.fft
     else:
         root = np

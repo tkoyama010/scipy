@@ -1,5 +1,5 @@
-''' Contexts for *with* statement providing temporary directories
-'''
+""" Contexts for *with* statement providing temporary directories
+"""
 from __future__ import division, print_function, absolute_import
 import os
 from contextlib import contextmanager
@@ -32,7 +32,7 @@ def tempdir():
 
 @contextmanager
 def in_tempdir():
-    ''' Create, return, and change directory to a temporary directory
+    """ Create, return, and change directory to a temporary directory
 
     Examples
     --------
@@ -46,7 +46,7 @@ def in_tempdir():
     False
     >>> os.getcwd() == my_cwd
     True
-    '''
+    """
     pwd = os.getcwd()
     d = mkdtemp()
     os.chdir(d)

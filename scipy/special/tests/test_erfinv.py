@@ -4,6 +4,7 @@ import pytest
 
 import scipy.special as sc
 
+
 class TestInverseErrorFunction:
     def test_compliment(self):
         # Test erfcinv(1 - x) == erfinv(x)
@@ -29,7 +30,7 @@ class TestInverseErrorFunction:
         assert_allclose(actual, expected, rtol=0, atol=1e-15)
 
     @pytest.mark.parametrize(
-        'f, x, y',
+        "f, x, y",
         [
             (sc.erfinv, -1, -np.inf),
             (sc.erfinv, 0, 0),
@@ -43,17 +44,17 @@ class TestInverseErrorFunction:
             (sc.erfcinv, 100, np.nan),
         ],
         ids=[
-            'erfinv at lower bound',
-            'erfinv at midpoint',
-            'erfinv at upper bound',
-            'erfinv below lower bound',
-            'erfinv above upper bound',
-            'erfcinv at lower bound',
-            'erfcinv at midpoint',
-            'erfcinv at upper bound',
-            'erfcinv below lower bound',
-            'erfcinv above upper bound',
-        ]
+            "erfinv at lower bound",
+            "erfinv at midpoint",
+            "erfinv at upper bound",
+            "erfinv below lower bound",
+            "erfinv above upper bound",
+            "erfcinv at lower bound",
+            "erfcinv at midpoint",
+            "erfcinv at upper bound",
+            "erfcinv below lower bound",
+            "erfcinv above upper bound",
+        ],
     )
     def test_domain_bounds(self, f, x, y):
         assert_equal(f(x), y)

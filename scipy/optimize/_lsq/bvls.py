@@ -58,8 +58,7 @@ def bvls(A, b, x_lsq, lb, ub, tol, max_iter, verbose):
     while free_set.size > 0:
         if verbose == 2:
             optimality = compute_kkt_optimality(g, on_bound)
-            print_iteration_linear(iteration, cost, cost_change, step_norm,
-                                   optimality)
+            print_iteration_linear(iteration, cost, cost_change, step_norm, optimality)
 
         iteration += 1
         x_free_old = x[free_set].copy()
@@ -110,8 +109,7 @@ def bvls(A, b, x_lsq, lb, ub, tol, max_iter, verbose):
     optimality = compute_kkt_optimality(g, on_bound)
     for iteration in range(iteration, max_iter):
         if verbose == 2:
-            print_iteration_linear(iteration, cost, cost_change,
-                                   step_norm, optimality)
+            print_iteration_linear(iteration, cost, cost_change, step_norm, optimality)
 
         if optimality < tol:
             termination_status = 1
@@ -139,9 +137,9 @@ def bvls(A, b, x_lsq, lb, ub, tol, max_iter, verbose):
         v = np.hstack((lbv, ubv))
 
         if v.size > 0:
-            alphas = np.hstack((
-                lb_free[lbv] - x_free[lbv],
-                ub_free[ubv] - x_free[ubv])) / (z[v] - x_free[v])
+            alphas = np.hstack(
+                (lb_free[lbv] - x_free[lbv], ub_free[ubv] - x_free[ubv])
+            ) / (z[v] - x_free[v])
 
             i = np.argmin(alphas)
             i_free = v[i]
@@ -175,6 +173,12 @@ def bvls(A, b, x_lsq, lb, ub, tol, max_iter, verbose):
         termination_status = 0
 
     return OptimizeResult(
-        x=x, fun=r, cost=cost, optimality=optimality, active_mask=on_bound,
-        nit=iteration + 1, status=termination_status,
-        initial_cost=initial_cost)
+        x=x,
+        fun=r,
+        cost=cost,
+        optimality=optimality,
+        active_mask=on_bound,
+        nit=iteration + 1,
+        status=termination_status,
+        initial_cost=initial_cost,
+    )

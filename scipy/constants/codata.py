@@ -54,8 +54,14 @@ from __future__ import division, print_function, absolute_import
 import warnings
 from math import pi, sqrt
 
-__all__ = ['physical_constants', 'value', 'unit', 'precision', 'find',
-           'ConstantWarning']
+__all__ = [
+    "physical_constants",
+    "value",
+    "unit",
+    "precision",
+    "find",
+    "ConstantWarning",
+]
 
 """
 Source:  https://physics.nist.gov/cuu/Constants/
@@ -1499,23 +1505,24 @@ physical_constants = {}
 
 def parse_constants_2002to2014(d):
     constants = {}
-    for line in d.split('\n'):
+    for line in d.split("\n"):
         name = line[:55].rstrip()
-        val = line[55:77].replace(' ', '').replace('...', '')
+        val = line[55:77].replace(" ", "").replace("...", "")
         val = float(val)
-        uncert = line[77:99].replace(' ', '').replace('(exact)', '0')
+        uncert = line[77:99].replace(" ", "").replace("(exact)", "0")
         uncert = float(uncert)
         units = line[99:].rstrip()
         constants[name] = (val, units, uncert)
     return constants
 
+
 def parse_constants_2018toXXXX(d):
     constants = {}
-    for line in d.split('\n'):
+    for line in d.split("\n"):
         name = line[:60].rstrip()
-        val = line[60:85].replace(' ', '').replace('...', '')
+        val = line[60:85].replace(" ", "").replace("...", "")
         val = float(val)
-        uncert = line[85:110].replace(' ', '').replace('(exact)', '0')
+        uncert = line[85:110].replace(" ", "").replace("(exact)", "0")
         uncert = float(uncert)
         units = line[110:].rstrip()
         constants[name] = (val, units, uncert)
@@ -1546,25 +1553,28 @@ for k in physical_constants:
 # generate some additional aliases
 _aliases = {}
 for k in _physical_constants_2002:
-    if 'magn.' in k:
-        _aliases[k] = k.replace('magn.', 'mag.')
+    if "magn." in k:
+        _aliases[k] = k.replace("magn.", "mag.")
 for k in _physical_constants_2006:
-    if 'momentum' in k:
-        _aliases[k] = k.replace('momentum', 'mom.um')
+    if "momentum" in k:
+        _aliases[k] = k.replace("momentum", "mom.um")
 for k in _physical_constants_2018:
-    if 'momentum' in k:
-        _aliases[k] = k.replace('momentum', 'mom.um')
+    if "momentum" in k:
+        _aliases[k] = k.replace("momentum", "mom.um")
 
 
 class ConstantWarning(DeprecationWarning):
     """Accessing a constant no longer in current CODATA data set"""
+
     pass
 
 
 def _check_obsolete(key):
     if key in _obsolete_constants and key not in _aliases:
-        warnings.warn("Constant '%s' is not in current %s data set" % (
-            key, _current_codata), ConstantWarning)
+        warnings.warn(
+            "Constant '%s' is not in current %s data set" % (key, _current_codata),
+            ConstantWarning,
+        )
 
 
 def value(key):
@@ -1692,8 +1702,7 @@ def find(sub=None, disp=False):
     if sub is None:
         result = list(_current_constants.keys())
     else:
-        result = [key for key in _current_constants
-                  if sub.lower() in key.lower()]
+        result = [key for key in _current_constants if sub.lower() in key.lower()]
 
     result.sort()
     if disp:
@@ -1705,17 +1714,17 @@ def find(sub=None, disp=False):
 
 
 # Table is lacking some digits for exact values: calculate from definition
-c = value('speed of light in vacuum')
+c = value("speed of light in vacuum")
 mu0 = 4e-7 * pi
 epsilon0 = 1 / (mu0 * c * c)
 
 exact_values = {
-    'vacuum mag. permeability': (mu0, 'N A^-2', 0.0),
-    'vacuum electric permittivity': (epsilon0, 'F m^-1', 0.0),
-    'atomic unit of permittivity': (4 * epsilon0 * pi, 'F m^-1', 0.0),
-    'joule-kilogram relationship': (1 / (c * c), 'kg', 0.0),
-    'kilogram-joule relationship': (c * c, 'J', 0.0),
-    'hertz-inverse meter relationship': (1 / c, 'm^-1', 0.0)
+    "vacuum mag. permeability": (mu0, "N A^-2", 0.0),
+    "vacuum electric permittivity": (epsilon0, "F m^-1", 0.0),
+    "atomic unit of permittivity": (4 * epsilon0 * pi, "F m^-1", 0.0),
+    "joule-kilogram relationship": (1 / (c * c), "kg", 0.0),
+    "kilogram-joule relationship": (c * c, "J", 0.0),
+    "hertz-inverse meter relationship": (1 / c, "m^-1", 0.0),
 }
 
 # sanity check
@@ -1726,16 +1735,18 @@ for key in exact_values:
 
 physical_constants.update(exact_values)
 
-_tested_keys = ['natural unit of velocity',
-                'natural unit of action',
-                'natural unit of action in eV s',
-                'natural unit of mass',
-                'natural unit of energy',
-                'natural unit of energy in MeV',
-                'natural unit of mom.um',
-                'natural unit of mom.um in MeV/c',
-                'natural unit of length',
-                'natural unit of time']
+_tested_keys = [
+    "natural unit of velocity",
+    "natural unit of action",
+    "natural unit of action in eV s",
+    "natural unit of mass",
+    "natural unit of energy",
+    "natural unit of energy in MeV",
+    "natural unit of mom.um",
+    "natural unit of mom.um in MeV/c",
+    "natural unit of length",
+    "natural unit of time",
+]
 
 # finally, insert aliases for values
 for k, v in list(_aliases.items()):

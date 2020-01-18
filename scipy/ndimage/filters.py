@@ -37,14 +37,32 @@ from . import _ni_support
 from . import _nd_image
 from . import _ni_docstrings
 
-__all__ = ['correlate1d', 'convolve1d', 'gaussian_filter1d', 'gaussian_filter',
-           'prewitt', 'sobel', 'generic_laplace', 'laplace',
-           'gaussian_laplace', 'generic_gradient_magnitude',
-           'gaussian_gradient_magnitude', 'correlate', 'convolve',
-           'uniform_filter1d', 'uniform_filter', 'minimum_filter1d',
-           'maximum_filter1d', 'minimum_filter', 'maximum_filter',
-           'rank_filter', 'median_filter', 'percentile_filter',
-           'generic_filter1d', 'generic_filter']
+__all__ = [
+    "correlate1d",
+    "convolve1d",
+    "gaussian_filter1d",
+    "gaussian_filter",
+    "prewitt",
+    "sobel",
+    "generic_laplace",
+    "laplace",
+    "gaussian_laplace",
+    "generic_gradient_magnitude",
+    "gaussian_gradient_magnitude",
+    "correlate",
+    "convolve",
+    "uniform_filter1d",
+    "uniform_filter",
+    "minimum_filter1d",
+    "maximum_filter1d",
+    "minimum_filter",
+    "maximum_filter",
+    "rank_filter",
+    "median_filter",
+    "percentile_filter",
+    "generic_filter1d",
+    "generic_filter",
+]
 
 
 def _invalid_origin(origin, lenw):
@@ -52,8 +70,9 @@ def _invalid_origin(origin, lenw):
 
 
 @_ni_docstrings.docfiller
-def correlate1d(input, weights, axis=-1, output=None, mode="reflect",
-                cval=0.0, origin=0):
+def correlate1d(
+    input, weights, axis=-1, output=None, mode="reflect", cval=0.0, origin=0
+):
     """Calculate a 1-D correlation along the given axis.
 
     The lines of the array along the given axis are correlated with the
@@ -78,27 +97,29 @@ def correlate1d(input, weights, axis=-1, output=None, mode="reflect",
     """
     input = numpy.asarray(input)
     if numpy.iscomplexobj(input):
-        raise TypeError('Complex type not supported')
+        raise TypeError("Complex type not supported")
     output = _ni_support._get_output(output, input)
     weights = numpy.asarray(weights, dtype=numpy.float64)
     if weights.ndim != 1 or weights.shape[0] < 1:
-        raise RuntimeError('no filter weights given')
+        raise RuntimeError("no filter weights given")
     if not weights.flags.contiguous:
         weights = weights.copy()
     axis = _ni_support._check_axis(axis, input.ndim)
     if _invalid_origin(origin, len(weights)):
-        raise ValueError('Invalid origin; origin must satisfy '
-                         '-(len(weights) // 2) <= origin <= '
-                         '(len(weights)-1) // 2')
+        raise ValueError(
+            "Invalid origin; origin must satisfy "
+            "-(len(weights) // 2) <= origin <= "
+            "(len(weights)-1) // 2"
+        )
     mode = _ni_support._extend_mode_to_code(mode)
-    _nd_image.correlate1d(input, weights, axis, output, mode, cval,
-                          origin)
+    _nd_image.correlate1d(input, weights, axis, output, mode, cval, origin)
     return output
 
 
 @_ni_docstrings.docfiller
-def convolve1d(input, weights, axis=-1, output=None, mode="reflect",
-               cval=0.0, origin=0):
+def convolve1d(
+    input, weights, axis=-1, output=None, mode="reflect", cval=0.0, origin=0
+):
     """Calculate a 1-D convolution along the given axis.
 
     The lines of the array along the given axis are convolved with the
@@ -138,10 +159,10 @@ def _gaussian_kernel1d(sigma, order, radius):
     Computes a 1-D Gaussian convolution kernel.
     """
     if order < 0:
-        raise ValueError('order must be non-negative')
+        raise ValueError("order must be non-negative")
     exponent_range = numpy.arange(order + 1)
     sigma2 = sigma * sigma
-    x = numpy.arange(-radius, radius+1)
+    x = numpy.arange(-radius, radius + 1)
     phi_x = numpy.exp(-0.5 / sigma2 * x ** 2)
     phi_x = phi_x / phi_x.sum()
 
@@ -156,7 +177,7 @@ def _gaussian_kernel1d(sigma, order, radius):
         q = numpy.zeros(order + 1)
         q[0] = 1
         D = numpy.diag(exponent_range[1:], 1)  # D @ q(x) = q'(x)
-        P = numpy.diag(numpy.ones(order)/-sigma2, -1)  # P @ q(x) = q(x) * p'(x)
+        P = numpy.diag(numpy.ones(order) / -sigma2, -1)  # P @ q(x) = q(x) * p'(x)
         Q_deriv = D + P
         for _ in range(order):
             q = Q_deriv.dot(q)
@@ -165,8 +186,9 @@ def _gaussian_kernel1d(sigma, order, radius):
 
 
 @_ni_docstrings.docfiller
-def gaussian_filter1d(input, sigma, axis=-1, order=0, output=None,
-                      mode="reflect", cval=0.0, truncate=4.0):
+def gaussian_filter1d(
+    input, sigma, axis=-1, order=0, output=None, mode="reflect", cval=0.0, truncate=4.0
+):
     """1-D Gaussian filter.
 
     Parameters
@@ -218,8 +240,9 @@ def gaussian_filter1d(input, sigma, axis=-1, order=0, output=None,
 
 
 @_ni_docstrings.docfiller
-def gaussian_filter(input, sigma, order=0, output=None,
-                    mode="reflect", cval=0.0, truncate=4.0):
+def gaussian_filter(
+    input, sigma, order=0, output=None, mode="reflect", cval=0.0, truncate=4.0
+):
     """Multidimensional Gaussian filter.
 
     Parameters
@@ -291,12 +314,14 @@ def gaussian_filter(input, sigma, order=0, output=None,
     sigmas = _ni_support._normalize_sequence(sigma, input.ndim)
     modes = _ni_support._normalize_sequence(mode, input.ndim)
     axes = list(range(input.ndim))
-    axes = [(axes[ii], sigmas[ii], orders[ii], modes[ii])
-            for ii in range(len(axes)) if sigmas[ii] > 1e-15]
+    axes = [
+        (axes[ii], sigmas[ii], orders[ii], modes[ii])
+        for ii in range(len(axes))
+        if sigmas[ii] > 1e-15
+    ]
     if len(axes) > 0:
         for axis, sigma, order, mode in axes:
-            gaussian_filter1d(input, sigma, axis, order, output,
-                              mode, cval, truncate)
+            gaussian_filter1d(input, sigma, axis, order, output, mode, cval, truncate)
             input = output
     else:
         output[...] = input[...]
@@ -336,7 +361,7 @@ def prewitt(input, axis=-1, output=None, mode="reflect", cval=0.0):
     correlate1d(input, [-1, 0, 1], axis, output, modes[axis], cval, 0)
     axes = [ii for ii in range(input.ndim) if ii != axis]
     for ii in axes:
-        correlate1d(output, [1, 1, 1], ii, output, modes[ii], cval, 0,)
+        correlate1d(output, [1, 1, 1], ii, output, modes[ii], cval, 0)
     return output
 
 
@@ -378,10 +403,15 @@ def sobel(input, axis=-1, output=None, mode="reflect", cval=0.0):
 
 
 @_ni_docstrings.docfiller
-def generic_laplace(input, derivative2, output=None, mode="reflect",
-                    cval=0.0,
-                    extra_arguments=(),
-                    extra_keywords=None):
+def generic_laplace(
+    input,
+    derivative2,
+    output=None,
+    mode="reflect",
+    cval=0.0,
+    extra_arguments=(),
+    extra_keywords=None,
+):
     """
     N-D Laplace filter using a provided second derivative function.
 
@@ -408,11 +438,19 @@ def generic_laplace(input, derivative2, output=None, mode="reflect",
     axes = list(range(input.ndim))
     if len(axes) > 0:
         modes = _ni_support._normalize_sequence(mode, len(axes))
-        derivative2(input, axes[0], output, modes[0], cval,
-                    *extra_arguments, **extra_keywords)
+        derivative2(
+            input, axes[0], output, modes[0], cval, *extra_arguments, **extra_keywords
+        )
         for ii in range(1, len(axes)):
-            tmp = derivative2(input, axes[ii], output.dtype, modes[ii], cval,
-                              *extra_arguments, **extra_keywords)
+            tmp = derivative2(
+                input,
+                axes[ii],
+                output.dtype,
+                modes[ii],
+                cval,
+                *extra_arguments,
+                **extra_keywords
+            )
             output += tmp
     else:
         output[...] = input[...]
@@ -444,14 +482,15 @@ def laplace(input, output=None, mode="reflect", cval=0.0):
     >>> ax2.imshow(result)
     >>> plt.show()
     """
+
     def derivative2(input, axis, output, mode, cval):
         return correlate1d(input, [1, -2, 1], axis, output, mode, cval, 0)
+
     return generic_laplace(input, derivative2, output, mode, cval)
 
 
 @_ni_docstrings.docfiller
-def gaussian_laplace(input, sigma, output=None, mode="reflect",
-                     cval=0.0, **kwargs):
+def gaussian_laplace(input, sigma, output=None, mode="reflect", cval=0.0, **kwargs):
     """Multidimensional Laplace filter using Gaussian second derivatives.
 
     Parameters
@@ -489,18 +528,29 @@ def gaussian_laplace(input, sigma, output=None, mode="reflect",
     def derivative2(input, axis, output, mode, cval, sigma, **kwargs):
         order = [0] * input.ndim
         order[axis] = 2
-        return gaussian_filter(input, sigma, order, output, mode, cval,
-                               **kwargs)
+        return gaussian_filter(input, sigma, order, output, mode, cval, **kwargs)
 
-    return generic_laplace(input, derivative2, output, mode, cval,
-                           extra_arguments=(sigma,),
-                           extra_keywords=kwargs)
+    return generic_laplace(
+        input,
+        derivative2,
+        output,
+        mode,
+        cval,
+        extra_arguments=(sigma,),
+        extra_keywords=kwargs,
+    )
 
 
 @_ni_docstrings.docfiller
-def generic_gradient_magnitude(input, derivative, output=None,
-                               mode="reflect", cval=0.0,
-                               extra_arguments=(), extra_keywords=None):
+def generic_gradient_magnitude(
+    input,
+    derivative,
+    output=None,
+    mode="reflect",
+    cval=0.0,
+    extra_arguments=(),
+    extra_keywords=None,
+):
     """Gradient magnitude using a provided gradient function.
 
     Parameters
@@ -529,24 +579,33 @@ def generic_gradient_magnitude(input, derivative, output=None,
     axes = list(range(input.ndim))
     if len(axes) > 0:
         modes = _ni_support._normalize_sequence(mode, len(axes))
-        derivative(input, axes[0], output, modes[0], cval,
-                   *extra_arguments, **extra_keywords)
+        derivative(
+            input, axes[0], output, modes[0], cval, *extra_arguments, **extra_keywords
+        )
         numpy.multiply(output, output, output)
         for ii in range(1, len(axes)):
-            tmp = derivative(input, axes[ii], output.dtype, modes[ii], cval,
-                             *extra_arguments, **extra_keywords)
+            tmp = derivative(
+                input,
+                axes[ii],
+                output.dtype,
+                modes[ii],
+                cval,
+                *extra_arguments,
+                **extra_keywords
+            )
             numpy.multiply(tmp, tmp, tmp)
             output += tmp
         # This allows the sqrt to work with a different default casting
-        numpy.sqrt(output, output, casting='unsafe')
+        numpy.sqrt(output, output, casting="unsafe")
     else:
         output[...] = input[...]
     return output
 
 
 @_ni_docstrings.docfiller
-def gaussian_gradient_magnitude(input, sigma, output=None,
-                                mode="reflect", cval=0.0, **kwargs):
+def gaussian_gradient_magnitude(
+    input, sigma, output=None, mode="reflect", cval=0.0, **kwargs
+):
     """Multidimensional gradient magnitude using Gaussian derivatives.
 
     Parameters
@@ -585,24 +644,28 @@ def gaussian_gradient_magnitude(input, sigma, output=None,
     def derivative(input, axis, output, mode, cval, sigma, **kwargs):
         order = [0] * input.ndim
         order[axis] = 1
-        return gaussian_filter(input, sigma, order, output, mode,
-                               cval, **kwargs)
+        return gaussian_filter(input, sigma, order, output, mode, cval, **kwargs)
 
-    return generic_gradient_magnitude(input, derivative, output, mode,
-                                      cval, extra_arguments=(sigma,),
-                                      extra_keywords=kwargs)
+    return generic_gradient_magnitude(
+        input,
+        derivative,
+        output,
+        mode,
+        cval,
+        extra_arguments=(sigma,),
+        extra_keywords=kwargs,
+    )
 
 
-def _correlate_or_convolve(input, weights, output, mode, cval, origin,
-                           convolution):
+def _correlate_or_convolve(input, weights, output, mode, cval, origin, convolution):
     input = numpy.asarray(input)
     if numpy.iscomplexobj(input):
-        raise TypeError('Complex type not supported')
+        raise TypeError("Complex type not supported")
     origins = _ni_support._normalize_sequence(origin, input.ndim)
     weights = numpy.asarray(weights, dtype=numpy.float64)
     wshape = [ii for ii in weights.shape if ii > 0]
     if len(wshape) != input.ndim:
-        raise RuntimeError('filter weights array has incorrect shape.')
+        raise RuntimeError("filter weights array has incorrect shape.")
     if convolution:
         weights = weights[tuple([slice(None, None, -1)] * weights.ndim)]
         for ii in range(len(origins)):
@@ -611,9 +674,11 @@ def _correlate_or_convolve(input, weights, output, mode, cval, origin,
                 origins[ii] -= 1
     for origin, lenw in zip(origins, wshape):
         if _invalid_origin(origin, lenw):
-            raise ValueError('Invalid origin; origin must satisfy '
-                             '-(weights.shape[k] // 2) <= origin[k] <= '
-                             '(weights.shape[k]-1) // 2')
+            raise ValueError(
+                "Invalid origin; origin must satisfy "
+                "-(weights.shape[k] // 2) <= origin[k] <= "
+                "(weights.shape[k]-1) // 2"
+            )
 
     if not weights.flags.contiguous:
         weights = weights.copy()
@@ -624,8 +689,7 @@ def _correlate_or_convolve(input, weights, output, mode, cval, origin,
 
 
 @_ni_docstrings.docfiller
-def correlate(input, weights, output=None, mode='reflect', cval=0.0,
-              origin=0):
+def correlate(input, weights, output=None, mode="reflect", cval=0.0, origin=0):
     """
     Multidimensional correlation.
 
@@ -645,13 +709,11 @@ def correlate(input, weights, output=None, mode='reflect', cval=0.0,
     --------
     convolve : Convolve an image with a kernel.
     """
-    return _correlate_or_convolve(input, weights, output, mode, cval,
-                                  origin, False)
+    return _correlate_or_convolve(input, weights, output, mode, cval, origin, False)
 
 
 @_ni_docstrings.docfiller
-def convolve(input, weights, output=None, mode='reflect', cval=0.0,
-             origin=0):
+def convolve(input, weights, output=None, mode="reflect", cval=0.0, origin=0):
     """
     Multidimensional convolution.
 
@@ -751,13 +813,13 @@ def convolve(input, weights, output=None, mode='reflect', cval=0.0,
            [3, 0, 1]])
 
     """
-    return _correlate_or_convolve(input, weights, output, mode, cval,
-                                  origin, True)
+    return _correlate_or_convolve(input, weights, output, mode, cval, origin, True)
 
 
 @_ni_docstrings.docfiller
-def uniform_filter1d(input, size, axis=-1, output=None,
-                     mode="reflect", cval=0.0, origin=0):
+def uniform_filter1d(
+    input, size, axis=-1, output=None, mode="reflect", cval=0.0, origin=0
+):
     """Calculate a 1-D uniform filter along the given axis.
 
     The lines of the array along the given axis are filtered with a
@@ -782,22 +844,20 @@ def uniform_filter1d(input, size, axis=-1, output=None,
     """
     input = numpy.asarray(input)
     if numpy.iscomplexobj(input):
-        raise TypeError('Complex type not supported')
+        raise TypeError("Complex type not supported")
     axis = _ni_support._check_axis(axis, input.ndim)
     if size < 1:
-        raise RuntimeError('incorrect filter size')
+        raise RuntimeError("incorrect filter size")
     output = _ni_support._get_output(output, input)
     if (size // 2 + origin < 0) or (size // 2 + origin >= size):
-        raise ValueError('invalid origin')
+        raise ValueError("invalid origin")
     mode = _ni_support._extend_mode_to_code(mode)
-    _nd_image.uniform_filter1d(input, size, axis, output, mode, cval,
-                               origin)
+    _nd_image.uniform_filter1d(input, size, axis, output, mode, cval, origin)
     return output
 
 
 @_ni_docstrings.docfiller
-def uniform_filter(input, size=3, output=None, mode="reflect",
-                   cval=0.0, origin=0):
+def uniform_filter(input, size=3, output=None, mode="reflect", cval=0.0, origin=0):
     """Multidimensional uniform filter.
 
     Parameters
@@ -845,12 +905,14 @@ def uniform_filter(input, size=3, output=None, mode="reflect",
     origins = _ni_support._normalize_sequence(origin, input.ndim)
     modes = _ni_support._normalize_sequence(mode, input.ndim)
     axes = list(range(input.ndim))
-    axes = [(axes[ii], sizes[ii], origins[ii], modes[ii])
-            for ii in range(len(axes)) if sizes[ii] > 1]
+    axes = [
+        (axes[ii], sizes[ii], origins[ii], modes[ii])
+        for ii in range(len(axes))
+        if sizes[ii] > 1
+    ]
     if len(axes) > 0:
         for axis, size, origin, mode in axes:
-            uniform_filter1d(input, int(size), axis, output, mode,
-                             cval, origin)
+            uniform_filter1d(input, int(size), axis, output, mode, cval, origin)
             input = output
     else:
         output[...] = input[...]
@@ -858,8 +920,9 @@ def uniform_filter(input, size=3, output=None, mode="reflect",
 
 
 @_ni_docstrings.docfiller
-def minimum_filter1d(input, size, axis=-1, output=None,
-                     mode="reflect", cval=0.0, origin=0):
+def minimum_filter1d(
+    input, size, axis=-1, output=None, mode="reflect", cval=0.0, origin=0
+):
     """Calculate a 1-D minimum filter along the given axis.
 
     The lines of the array along the given axis are filtered with a
@@ -896,22 +959,22 @@ def minimum_filter1d(input, size, axis=-1, output=None,
     """
     input = numpy.asarray(input)
     if numpy.iscomplexobj(input):
-        raise TypeError('Complex type not supported')
+        raise TypeError("Complex type not supported")
     axis = _ni_support._check_axis(axis, input.ndim)
     if size < 1:
-        raise RuntimeError('incorrect filter size')
+        raise RuntimeError("incorrect filter size")
     output = _ni_support._get_output(output, input)
     if (size // 2 + origin < 0) or (size // 2 + origin >= size):
-        raise ValueError('invalid origin')
+        raise ValueError("invalid origin")
     mode = _ni_support._extend_mode_to_code(mode)
-    _nd_image.min_or_max_filter1d(input, size, axis, output, mode, cval,
-                                  origin, 1)
+    _nd_image.min_or_max_filter1d(input, size, axis, output, mode, cval, origin, 1)
     return output
 
 
 @_ni_docstrings.docfiller
-def maximum_filter1d(input, size, axis=-1, output=None,
-                     mode="reflect", cval=0.0, origin=0):
+def maximum_filter1d(
+    input, size, axis=-1, output=None, mode="reflect", cval=0.0, origin=0
+):
     """Calculate a 1-D maximum filter along the given axis.
 
     The lines of the array along the given axis are filtered with a
@@ -953,23 +1016,25 @@ def maximum_filter1d(input, size, axis=-1, output=None,
     """
     input = numpy.asarray(input)
     if numpy.iscomplexobj(input):
-        raise TypeError('Complex type not supported')
+        raise TypeError("Complex type not supported")
     axis = _ni_support._check_axis(axis, input.ndim)
     if size < 1:
-        raise RuntimeError('incorrect filter size')
+        raise RuntimeError("incorrect filter size")
     output = _ni_support._get_output(output, input)
     if (size // 2 + origin < 0) or (size // 2 + origin >= size):
-        raise ValueError('invalid origin')
+        raise ValueError("invalid origin")
     mode = _ni_support._extend_mode_to_code(mode)
-    _nd_image.min_or_max_filter1d(input, size, axis, output, mode, cval,
-                                  origin, 0)
+    _nd_image.min_or_max_filter1d(input, size, axis, output, mode, cval, origin, 0)
     return output
 
 
-def _min_or_max_filter(input, size, footprint, structure, output, mode,
-                       cval, origin, minimum):
+def _min_or_max_filter(
+    input, size, footprint, structure, output, mode, cval, origin, minimum
+):
     if (size is not None) and (footprint is not None):
-        warnings.warn("ignoring size because footprint is set", UserWarning, stacklevel=3)
+        warnings.warn(
+            "ignoring size because footprint is set", UserWarning, stacklevel=3
+        )
     if structure is None:
         if footprint is None:
             if size is None:
@@ -994,15 +1059,18 @@ def _min_or_max_filter(input, size, footprint, structure, output, mode,
             footprint = numpy.asarray(footprint, dtype=bool)
     input = numpy.asarray(input)
     if numpy.iscomplexobj(input):
-        raise TypeError('Complex type not supported')
+        raise TypeError("Complex type not supported")
     output = _ni_support._get_output(output, input)
     origins = _ni_support._normalize_sequence(origin, input.ndim)
     if separable:
         sizes = _ni_support._normalize_sequence(size, input.ndim)
         modes = _ni_support._normalize_sequence(mode, input.ndim)
         axes = list(range(input.ndim))
-        axes = [(axes[ii], sizes[ii], origins[ii], modes[ii])
-                for ii in range(len(axes)) if sizes[ii] > 1]
+        axes = [
+            (axes[ii], sizes[ii], origins[ii], modes[ii])
+            for ii in range(len(axes))
+            if sizes[ii] > 1
+        ]
         if minimum:
             filter_ = minimum_filter1d
         else:
@@ -1016,26 +1084,28 @@ def _min_or_max_filter(input, size, footprint, structure, output, mode,
     else:
         fshape = [ii for ii in footprint.shape if ii > 0]
         if len(fshape) != input.ndim:
-            raise RuntimeError('footprint array has incorrect shape.')
+            raise RuntimeError("footprint array has incorrect shape.")
         for origin, lenf in zip(origins, fshape):
             if (lenf // 2 + origin < 0) or (lenf // 2 + origin >= lenf):
-                raise ValueError('invalid origin')
+                raise ValueError("invalid origin")
         if not footprint.flags.contiguous:
             footprint = footprint.copy()
         if structure is not None:
             if len(structure.shape) != input.ndim:
-                raise RuntimeError('structure array has incorrect shape')
+                raise RuntimeError("structure array has incorrect shape")
             if not structure.flags.contiguous:
                 structure = structure.copy()
         mode = _ni_support._extend_mode_to_code(mode)
-        _nd_image.min_or_max_filter(input, footprint, structure, output,
-                                    mode, cval, origins, minimum)
+        _nd_image.min_or_max_filter(
+            input, footprint, structure, output, mode, cval, origins, minimum
+        )
     return output
 
 
 @_ni_docstrings.docfiller
-def minimum_filter(input, size=None, footprint=None, output=None,
-                   mode="reflect", cval=0.0, origin=0):
+def minimum_filter(
+    input, size=None, footprint=None, output=None, mode="reflect", cval=0.0, origin=0
+):
     """Calculate a multidimensional minimum filter.
 
     Parameters
@@ -1066,13 +1136,15 @@ def minimum_filter(input, size=None, footprint=None, output=None,
     >>> ax2.imshow(result)
     >>> plt.show()
     """
-    return _min_or_max_filter(input, size, footprint, None, output, mode,
-                              cval, origin, 1)
+    return _min_or_max_filter(
+        input, size, footprint, None, output, mode, cval, origin, 1
+    )
 
 
 @_ni_docstrings.docfiller
-def maximum_filter(input, size=None, footprint=None, output=None,
-                   mode="reflect", cval=0.0, origin=0):
+def maximum_filter(
+    input, size=None, footprint=None, output=None, mode="reflect", cval=0.0, origin=0
+):
     """Calculate a multidimensional maximum filter.
 
     Parameters
@@ -1103,18 +1175,30 @@ def maximum_filter(input, size=None, footprint=None, output=None,
     >>> ax2.imshow(result)
     >>> plt.show()
     """
-    return _min_or_max_filter(input, size, footprint, None, output, mode,
-                              cval, origin, 0)
+    return _min_or_max_filter(
+        input, size, footprint, None, output, mode, cval, origin, 0
+    )
 
 
 @_ni_docstrings.docfiller
-def _rank_filter(input, rank, size=None, footprint=None, output=None,
-                 mode="reflect", cval=0.0, origin=0, operation='rank'):
+def _rank_filter(
+    input,
+    rank,
+    size=None,
+    footprint=None,
+    output=None,
+    mode="reflect",
+    cval=0.0,
+    origin=0,
+    operation="rank",
+):
     if (size is not None) and (footprint is not None):
-        warnings.warn("ignoring size because footprint is set", UserWarning, stacklevel=3)
+        warnings.warn(
+            "ignoring size because footprint is set", UserWarning, stacklevel=3
+        )
     input = numpy.asarray(input)
     if numpy.iscomplexobj(input):
-        raise TypeError('Complex type not supported')
+        raise TypeError("Complex type not supported")
     origins = _ni_support._normalize_sequence(origin, input.ndim)
     if footprint is None:
         if size is None:
@@ -1125,21 +1209,21 @@ def _rank_filter(input, rank, size=None, footprint=None, output=None,
         footprint = numpy.asarray(footprint, dtype=bool)
     fshape = [ii for ii in footprint.shape if ii > 0]
     if len(fshape) != input.ndim:
-        raise RuntimeError('filter footprint array has incorrect shape.')
+        raise RuntimeError("filter footprint array has incorrect shape.")
     for origin, lenf in zip(origins, fshape):
         if (lenf // 2 + origin < 0) or (lenf // 2 + origin >= lenf):
-            raise ValueError('invalid origin')
+            raise ValueError("invalid origin")
     if not footprint.flags.contiguous:
         footprint = footprint.copy()
     filter_size = numpy.where(footprint, 1, 0).sum()
-    if operation == 'median':
+    if operation == "median":
         rank = filter_size // 2
-    elif operation == 'percentile':
+    elif operation == "percentile":
         percentile = rank
         if percentile < 0.0:
             percentile += 100.0
         if percentile < 0 or percentile > 100:
-            raise RuntimeError('invalid percentile')
+            raise RuntimeError("invalid percentile")
         if percentile == 100.0:
             rank = filter_size - 1
         else:
@@ -1147,24 +1231,29 @@ def _rank_filter(input, rank, size=None, footprint=None, output=None,
     if rank < 0:
         rank += filter_size
     if rank < 0 or rank >= filter_size:
-        raise RuntimeError('rank not within filter footprint size')
+        raise RuntimeError("rank not within filter footprint size")
     if rank == 0:
-        return minimum_filter(input, None, footprint, output, mode, cval,
-                              origins)
+        return minimum_filter(input, None, footprint, output, mode, cval, origins)
     elif rank == filter_size - 1:
-        return maximum_filter(input, None, footprint, output, mode, cval,
-                              origins)
+        return maximum_filter(input, None, footprint, output, mode, cval, origins)
     else:
         output = _ni_support._get_output(output, input)
         mode = _ni_support._extend_mode_to_code(mode)
-        _nd_image.rank_filter(input, rank, footprint, output, mode, cval,
-                              origins)
+        _nd_image.rank_filter(input, rank, footprint, output, mode, cval, origins)
         return output
 
 
 @_ni_docstrings.docfiller
-def rank_filter(input, rank, size=None, footprint=None, output=None,
-                mode="reflect", cval=0.0, origin=0):
+def rank_filter(
+    input,
+    rank,
+    size=None,
+    footprint=None,
+    output=None,
+    mode="reflect",
+    cval=0.0,
+    origin=0,
+):
     """Calculate a multidimensional rank filter.
 
     Parameters
@@ -1199,13 +1288,15 @@ def rank_filter(input, rank, size=None, footprint=None, output=None,
     >>> plt.show()
     """
     rank = operator.index(rank)
-    return _rank_filter(input, rank, size, footprint, output, mode, cval,
-                        origin, 'rank')
+    return _rank_filter(
+        input, rank, size, footprint, output, mode, cval, origin, "rank"
+    )
 
 
 @_ni_docstrings.docfiller
-def median_filter(input, size=None, footprint=None, output=None,
-                  mode="reflect", cval=0.0, origin=0):
+def median_filter(
+    input, size=None, footprint=None, output=None, mode="reflect", cval=0.0, origin=0
+):
     """
     Calculate a multidimensional median filter.
 
@@ -1237,13 +1328,20 @@ def median_filter(input, size=None, footprint=None, output=None,
     >>> ax2.imshow(result)
     >>> plt.show()
     """
-    return _rank_filter(input, 0, size, footprint, output, mode, cval,
-                        origin, 'median')
+    return _rank_filter(input, 0, size, footprint, output, mode, cval, origin, "median")
 
 
 @_ni_docstrings.docfiller
-def percentile_filter(input, percentile, size=None, footprint=None,
-                      output=None, mode="reflect", cval=0.0, origin=0):
+def percentile_filter(
+    input,
+    percentile,
+    size=None,
+    footprint=None,
+    output=None,
+    mode="reflect",
+    cval=0.0,
+    origin=0,
+):
     """Calculate a multidimensional percentile filter.
 
     Parameters
@@ -1277,14 +1375,24 @@ def percentile_filter(input, percentile, size=None, footprint=None,
     >>> ax2.imshow(result)
     >>> plt.show()
     """
-    return _rank_filter(input, percentile, size, footprint, output, mode,
-                        cval, origin, 'percentile')
+    return _rank_filter(
+        input, percentile, size, footprint, output, mode, cval, origin, "percentile"
+    )
 
 
 @_ni_docstrings.docfiller
-def generic_filter1d(input, function, filter_size, axis=-1,
-                     output=None, mode="reflect", cval=0.0, origin=0,
-                     extra_arguments=(), extra_keywords=None):
+def generic_filter1d(
+    input,
+    function,
+    filter_size,
+    axis=-1,
+    output=None,
+    mode="reflect",
+    cval=0.0,
+    origin=0,
+    extra_arguments=(),
+    extra_keywords=None,
+):
     """Calculate a 1-D filter along the given axis.
 
     `generic_filter1d` iterates over the lines of the array, calling the
@@ -1349,25 +1457,42 @@ def generic_filter1d(input, function, filter_size, axis=-1,
         extra_keywords = {}
     input = numpy.asarray(input)
     if numpy.iscomplexobj(input):
-        raise TypeError('Complex type not supported')
+        raise TypeError("Complex type not supported")
     output = _ni_support._get_output(output, input)
     if filter_size < 1:
-        raise RuntimeError('invalid filter size')
+        raise RuntimeError("invalid filter size")
     axis = _ni_support._check_axis(axis, input.ndim)
-    if (filter_size // 2 + origin < 0) or (filter_size // 2 + origin >=
-                                           filter_size):
-        raise ValueError('invalid origin')
+    if (filter_size // 2 + origin < 0) or (filter_size // 2 + origin >= filter_size):
+        raise ValueError("invalid origin")
     mode = _ni_support._extend_mode_to_code(mode)
-    _nd_image.generic_filter1d(input, function, filter_size, axis, output,
-                               mode, cval, origin, extra_arguments,
-                               extra_keywords)
+    _nd_image.generic_filter1d(
+        input,
+        function,
+        filter_size,
+        axis,
+        output,
+        mode,
+        cval,
+        origin,
+        extra_arguments,
+        extra_keywords,
+    )
     return output
 
 
 @_ni_docstrings.docfiller
-def generic_filter(input, function, size=None, footprint=None,
-                   output=None, mode="reflect", cval=0.0, origin=0,
-                   extra_arguments=(), extra_keywords=None):
+def generic_filter(
+    input,
+    function,
+    size=None,
+    footprint=None,
+    output=None,
+    mode="reflect",
+    cval=0.0,
+    origin=0,
+    extra_arguments=(),
+    extra_keywords=None,
+):
     """Calculate a multidimensional filter using the given function.
 
     At each element the provided function is called. The input values
@@ -1419,12 +1544,14 @@ def generic_filter(input, function, size=None, footprint=None,
 
     """
     if (size is not None) and (footprint is not None):
-        warnings.warn("ignoring size because footprint is set", UserWarning, stacklevel=2)
+        warnings.warn(
+            "ignoring size because footprint is set", UserWarning, stacklevel=2
+        )
     if extra_keywords is None:
         extra_keywords = {}
     input = numpy.asarray(input)
     if numpy.iscomplexobj(input):
-        raise TypeError('Complex type not supported')
+        raise TypeError("Complex type not supported")
     origins = _ni_support._normalize_sequence(origin, input.ndim)
     if footprint is None:
         if size is None:
@@ -1435,14 +1562,23 @@ def generic_filter(input, function, size=None, footprint=None,
         footprint = numpy.asarray(footprint, dtype=bool)
     fshape = [ii for ii in footprint.shape if ii > 0]
     if len(fshape) != input.ndim:
-        raise RuntimeError('filter footprint array has incorrect shape.')
+        raise RuntimeError("filter footprint array has incorrect shape.")
     for origin, lenf in zip(origins, fshape):
         if (lenf // 2 + origin < 0) or (lenf // 2 + origin >= lenf):
-            raise ValueError('invalid origin')
+            raise ValueError("invalid origin")
     if not footprint.flags.contiguous:
         footprint = footprint.copy()
     output = _ni_support._get_output(output, input)
     mode = _ni_support._extend_mode_to_code(mode)
-    _nd_image.generic_filter(input, function, footprint, output, mode,
-                             cval, origins, extra_arguments, extra_keywords)
+    _nd_image.generic_filter(
+        input,
+        function,
+        footprint,
+        output,
+        mode,
+        cval,
+        origins,
+        extra_arguments,
+        extra_keywords,
+    )
     return output

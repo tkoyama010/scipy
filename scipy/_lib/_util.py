@@ -111,16 +111,16 @@ def _aligned_zeros(shape, dtype=float, order="C", align=None):
     dtype = np.dtype(dtype)
     if align is None:
         align = dtype.alignment
-    if not hasattr(shape, '__len__'):
+    if not hasattr(shape, "__len__"):
         shape = (shape,)
     size = functools.reduce(operator.mul, shape) * dtype.itemsize
     buf = np.empty(size + align + 1, np.uint8)
-    offset = buf.__array_interface__['data'][0] % align
+    offset = buf.__array_interface__["data"][0] % align
     if offset != 0:
         offset = align - offset
     # Note: slices producing 0-size arrays do not necessarily change
     # data pointer --- so we use and allocate size+1
-    buf = buf[offset:offset+size+1][:-1]
+    buf = buf[offset : offset + size + 1][:-1]
     data = np.ndarray(shape, dtype, buf, order=order)
     data.fill(0)
     return data
@@ -164,9 +164,11 @@ class DeprecatedImport(object):
         return dir(self._mod)
 
     def __getattr__(self, name):
-        warnings.warn("Module %s is deprecated, use %s instead"
-                      % (self._old_name, self._new_name),
-                      DeprecationWarning)
+        warnings.warn(
+            "Module %s is deprecated, use %s instead"
+            % (self._old_name, self._new_name),
+            DeprecationWarning,
+        )
         return getattr(self._mod, name)
 
 
@@ -193,13 +195,19 @@ def check_random_state(seed):
             return seed
     except AttributeError:
         pass
-    raise ValueError('%r cannot be used to seed a numpy.random.RandomState'
-                     ' instance' % seed)
+    raise ValueError(
+        "%r cannot be used to seed a numpy.random.RandomState" " instance" % seed
+    )
 
 
-def _asarray_validated(a, check_finite=True,
-                       sparse_ok=False, objects_ok=False, mask_ok=False,
-                       as_inexact=False):
+def _asarray_validated(
+    a,
+    check_finite=True,
+    sparse_ok=False,
+    objects_ok=False,
+    mask_ok=False,
+    as_inexact=False,
+):
     """
     Helper function for SciPy argument validation.
 
@@ -234,19 +242,22 @@ def _asarray_validated(a, check_finite=True,
     """
     if not sparse_ok:
         import scipy.sparse
+
         if scipy.sparse.issparse(a):
-            msg = ('Sparse matrices are not supported by this function. '
-                   'Perhaps one of the scipy.sparse.linalg functions '
-                   'would work instead.')
+            msg = (
+                "Sparse matrices are not supported by this function. "
+                "Perhaps one of the scipy.sparse.linalg functions "
+                "would work instead."
+            )
             raise ValueError(msg)
     if not mask_ok:
         if np.ma.isMaskedArray(a):
-            raise ValueError('masked arrays are not supported')
+            raise ValueError("masked arrays are not supported")
     toarray = np.asarray_chkfinite if check_finite else np.asarray
     a = toarray(a)
     if not objects_ok:
-        if a.dtype is np.dtype('O'):
-            raise ValueError('object arrays are not supported')
+        if a.dtype is np.dtype("O"):
+            raise ValueError("object arrays are not supported")
     if as_inexact:
         if not np.issubdtype(a.dtype, np.inexact):
             a = toarray(a, dtype=np.float_)
@@ -265,7 +276,7 @@ def _asarray_validated(a, check_finite=True,
 #
 # This way, the caller code does not need to know whether it uses a legacy
 # .getargspec or a bright and shiny .signature.
-ArgSpec = namedtuple('ArgSpec', ['args', 'varargs', 'keywords', 'defaults'])
+ArgSpec = namedtuple("ArgSpec", ["args", "varargs", "keywords", "defaults"])
 
 
 def getargspec_no_self(func):
@@ -291,23 +302,29 @@ def getargspec_no_self(func):
     """
     sig = inspect.signature(func)
     args = [
-        p.name for p in sig.parameters.values()
+        p.name
+        for p in sig.parameters.values()
         if p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
     ]
     varargs = [
-        p.name for p in sig.parameters.values()
+        p.name
+        for p in sig.parameters.values()
         if p.kind == inspect.Parameter.VAR_POSITIONAL
     ]
     varargs = varargs[0] if varargs else None
     varkw = [
-        p.name for p in sig.parameters.values()
+        p.name
+        for p in sig.parameters.values()
         if p.kind == inspect.Parameter.VAR_KEYWORD
     ]
     varkw = varkw[0] if varkw else None
     defaults = [
-        p.default for p in sig.parameters.values()
-        if (p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD and
-           p.default is not p.empty)
+        p.default
+        for p in sig.parameters.values()
+        if (
+            p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+            and p.default is not p.empty
+        )
     ] or None
     return ArgSpec(args, varargs, varkw, defaults)
 
@@ -328,6 +345,7 @@ class MapWrapper(object):
         calling sequence as the built-in map function, then this callable is
         used for parallelization.
     """
+
     def __init__(self, pool=1):
         self.pool = None
         self._mapfunc = map
@@ -351,8 +369,10 @@ class MapWrapper(object):
                 self._mapfunc = self.pool.map
                 self._own_pool = True
             else:
-                raise RuntimeError("Number of workers specified must be -1,"
-                                   " an int >= 1, or an object with a 'map' method")
+                raise RuntimeError(
+                    "Number of workers specified must be -1,"
+                    " an int >= 1, or an object with a 'map' method"
+                )
 
     def __enter__(self):
         return self
@@ -384,5 +404,6 @@ class MapWrapper(object):
             return self._mapfunc(func, iterable)
         except TypeError:
             # wrong number of arguments
-            raise TypeError("The map-like callable must be of the"
-                            " form f(func, iterable)")
+            raise TypeError(
+                "The map-like callable must be of the" " form f(func, iterable)"
+            )

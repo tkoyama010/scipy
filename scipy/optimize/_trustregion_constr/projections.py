@@ -1,23 +1,23 @@
 """Basic linear factorizations needed by the solver."""
 
 from __future__ import division, print_function, absolute_import
-from scipy.sparse import (bmat, csc_matrix, eye, issparse)
+from scipy.sparse import bmat, csc_matrix, eye, issparse
 from scipy.sparse.linalg import LinearOperator
 import scipy.linalg
 import scipy.sparse.linalg
+
 try:
     from sksparse.cholmod import cholesky_AAt
+
     sksparse_available = True
 except ImportError:
     import warnings
+
     sksparse_available = False
 import numpy as np
 from warnings import warn
 
-__all__ = [
-    'orthogonality',
-    'projections',
-]
+__all__ = ["orthogonality", "projections"]
 
 
 def orthogonality(A, g):
@@ -41,9 +41,9 @@ def orthogonality(A, g):
     norm_g = np.linalg.norm(g)
     # Compute Froebnius norm of the matrix A
     if issparse(A):
-        norm_A = scipy.sparse.linalg.norm(A, ord='fro')
+        norm_A = scipy.sparse.linalg.norm(A, ord="fro")
     else:
-        norm_A = np.linalg.norm(A, ord='fro')
+        norm_A = np.linalg.norm(A, ord="fro")
 
     # Check if norms are zero
     if norm_g == 0 or norm_A == 0:
@@ -51,7 +51,7 @@ def orthogonality(A, g):
 
     norm_A_g = np.linalg.norm(A.dot(g))
     # Orthogonality measure
-    orth = norm_A_g / (norm_A*norm_g)
+    orth = norm_A_g / (norm_A * norm_g)
     return orth
 
 
@@ -101,11 +101,13 @@ def augmented_system_projections(A, m, n, orth_tol, max_refin, tol):
     try:
         solve = scipy.sparse.linalg.factorized(K)
     except RuntimeError:
-        warn("Singular Jacobian matrix. Using dense SVD decomposition to "
-             "perform the factorizations.")
-        return svd_factorization_projections(A.toarray(),
-                                             m, n, orth_tol,
-                                             max_refin, tol)
+        warn(
+            "Singular Jacobian matrix. Using dense SVD decomposition to "
+            "perform the factorizations."
+        )
+        return svd_factorization_projections(
+            A.toarray(), m, n, orth_tol, max_refin, tol
+        )
 
     # z = x - A.T inv(A A.T) A x
     # is computed solving the extended system:
@@ -153,7 +155,7 @@ def augmented_system_projections(A, m, n, orth_tol, max_refin, tol):
         #          [ z ]
         lu_sol = solve(v)
         # return z = inv(A A.T) A x
-        return lu_sol[n:m+n]
+        return lu_sol[n : m + n]
 
     # z = A.T inv(A A.T) x
     # is computed solving the extended system:
@@ -176,15 +178,14 @@ def qr_factorization_projections(A, m, n, orth_tol, max_refin, tol):
     """Return linear operators for matrix A using ``QRFactorization`` approach.
     """
     # QRFactorization
-    Q, R, P = scipy.linalg.qr(A.T, pivoting=True, mode='economic')
+    Q, R, P = scipy.linalg.qr(A.T, pivoting=True, mode="economic")
 
     if np.linalg.norm(R[-1, :], np.inf) < tol:
-        warn('Singular Jacobian matrix. Using SVD decomposition to ' +
-             'perform the factorizations.')
-        return svd_factorization_projections(A, m, n,
-                                             orth_tol,
-                                             max_refin,
-                                             tol)
+        warn(
+            "Singular Jacobian matrix. Using SVD decomposition to "
+            + "perform the factorizations."
+        )
+        return svd_factorization_projections(A, m, n, orth_tol, max_refin, tol)
 
     # z = x - A.T inv(A A.T) A x
     def null_space(x):
@@ -224,9 +225,7 @@ def qr_factorization_projections(A, m, n, orth_tol, max_refin, tol):
     def row_space(x):
         # z = Q inv(R.T) P.T x
         aux1 = x[P]
-        aux2 = scipy.linalg.solve_triangular(R, aux1,
-                                             lower=False,
-                                             trans='T')
+        aux2 = scipy.linalg.solve_triangular(R, aux1, lower=False, trans="T")
         z = Q.dot(aux2)
         return z
 
@@ -248,7 +247,7 @@ def svd_factorization_projections(A, m, n, orth_tol, max_refin, tol):
     def null_space(x):
         # v = U 1/s V.T x = inv(A A.T) A x
         aux1 = Vt.dot(x)
-        aux2 = 1/s*aux1
+        aux2 = 1 / s * aux1
         v = U.dot(aux2)
         z = x - A.T.dot(v)
 
@@ -260,7 +259,7 @@ def svd_factorization_projections(A, m, n, orth_tol, max_refin, tol):
                 break
             # v = U 1/s V.T x = inv(A A.T) A x
             aux1 = Vt.dot(z)
-            aux2 = 1/s*aux1
+            aux2 = 1 / s * aux1
             v = U.dot(aux2)
             # z_next = z - A.T v
             z = z - A.T.dot(v)
@@ -272,7 +271,7 @@ def svd_factorization_projections(A, m, n, orth_tol, max_refin, tol):
     def least_squares(x):
         # z = U 1/s V.T x = inv(A A.T) A x
         aux1 = Vt.dot(x)
-        aux2 = 1/s*aux1
+        aux2 = 1 / s * aux1
         z = U.dot(aux2)
         return z
 
@@ -280,7 +279,7 @@ def svd_factorization_projections(A, m, n, orth_tol, max_refin, tol):
     def row_space(x):
         # z = V 1/s U.T x
         aux1 = U.T.dot(x)
-        aux2 = 1/s*aux1
+        aux2 = 1 / s * aux1
         z = Vt.T.dot(aux2)
         return z
 
@@ -365,7 +364,7 @@ def projections(A, method=None, orth_tol=1e-12, max_refin=3, tol=1e-15):
 
     # The factorization of an empty matrix
     # only works for the sparse representation.
-    if m*n == 0:
+    if m * n == 0:
         A = csc_matrix(A)
 
     # Check Argument
@@ -375,29 +374,37 @@ def projections(A, method=None, orth_tol=1e-12, max_refin=3, tol=1e-15):
         if method not in ("NormalEquation", "AugmentedSystem"):
             raise ValueError("Method not allowed for sparse matrix.")
         if method == "NormalEquation" and not sksparse_available:
-            warnings.warn(("Only accepts 'NormalEquation' option when"
-                           " scikit-sparse is available. Using "
-                           "'AugmentedSystem' option instead."),
-                          ImportWarning)
-            method = 'AugmentedSystem'
+            warnings.warn(
+                (
+                    "Only accepts 'NormalEquation' option when"
+                    " scikit-sparse is available. Using "
+                    "'AugmentedSystem' option instead."
+                ),
+                ImportWarning,
+            )
+            method = "AugmentedSystem"
     else:
         if method is None:
             method = "QRFactorization"
         if method not in ("QRFactorization", "SVDFactorization"):
             raise ValueError("Method not allowed for dense array.")
 
-    if method == 'NormalEquation':
-        null_space, least_squares, row_space \
-            = normal_equation_projections(A, m, n, orth_tol, max_refin, tol)
-    elif method == 'AugmentedSystem':
-        null_space, least_squares, row_space \
-            = augmented_system_projections(A, m, n, orth_tol, max_refin, tol)
+    if method == "NormalEquation":
+        null_space, least_squares, row_space = normal_equation_projections(
+            A, m, n, orth_tol, max_refin, tol
+        )
+    elif method == "AugmentedSystem":
+        null_space, least_squares, row_space = augmented_system_projections(
+            A, m, n, orth_tol, max_refin, tol
+        )
     elif method == "QRFactorization":
-        null_space, least_squares, row_space \
-            = qr_factorization_projections(A, m, n, orth_tol, max_refin, tol)
+        null_space, least_squares, row_space = qr_factorization_projections(
+            A, m, n, orth_tol, max_refin, tol
+        )
     elif method == "SVDFactorization":
-        null_space, least_squares, row_space \
-            = svd_factorization_projections(A, m, n, orth_tol, max_refin, tol)
+        null_space, least_squares, row_space = svd_factorization_projections(
+            A, m, n, orth_tol, max_refin, tol
+        )
 
     Z = LinearOperator((n, n), null_space)
     LS = LinearOperator((m, n), least_squares)

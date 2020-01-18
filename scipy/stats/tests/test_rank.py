@@ -7,7 +7,6 @@ from scipy.stats import rankdata, tiecorrect
 
 
 class TestTieCorrect(object):
-
     def test_empty(self):
         """An empty array requires no correction, should return 1.0."""
         ranks = np.array([], dtype=np.float64)
@@ -36,7 +35,7 @@ class TestTieCorrect(object):
         c = tiecorrect(ranks)
         T = 2.0
         N = ranks.size
-        expected = 1.0 - (T**3 - T) / (N**3 - N)
+        expected = 1.0 - (T ** 3 - T) / (N ** 3 - N)
         assert_equal(c, expected)
 
         # One tie of two elements (same as above, but tie is not at the end)
@@ -44,7 +43,7 @@ class TestTieCorrect(object):
         c = tiecorrect(ranks)
         T = 2.0
         N = ranks.size
-        expected = 1.0 - (T**3 - T) / (N**3 - N)
+        expected = 1.0 - (T ** 3 - T) / (N ** 3 - N)
         assert_equal(c, expected)
 
         # One tie of three elements
@@ -52,7 +51,7 @@ class TestTieCorrect(object):
         c = tiecorrect(ranks)
         T = 3.0
         N = ranks.size
-        expected = 1.0 - (T**3 - T) / (N**3 - N)
+        expected = 1.0 - (T ** 3 - T) / (N ** 3 - N)
         assert_equal(c, expected)
 
         # Two ties, lengths 2 and 3.
@@ -61,7 +60,7 @@ class TestTieCorrect(object):
         T1 = 2.0
         T2 = 3.0
         N = ranks.size
-        expected = 1.0 - ((T1**3 - T1) + (T2**3 - T2)) / (N**3 - N)
+        expected = 1.0 - ((T1 ** 3 - T1) + (T2 ** 3 - T2)) / (N ** 3 - N)
         assert_equal(c, expected)
 
     def test_overflow(self):
@@ -69,11 +68,10 @@ class TestTieCorrect(object):
         a = np.repeat(np.arange(k), ntie)
         n = a.size  # ntie * k
         out = tiecorrect(rankdata(a))
-        assert_equal(out, 1.0 - k * (ntie**3 - ntie) / float(n**3 - n))
+        assert_equal(out, 1.0 - k * (ntie ** 3 - ntie) / float(n ** 3 - n))
 
 
 class TestRankData(object):
-
     def test_empty(self):
         """stats.rankdata([]) should return an empty array."""
         a = np.array([], dtype=int)
@@ -133,31 +131,36 @@ class TestRankData(object):
             b = np.unique(a)
             return [1 + sum(i < j for i in b) for j in a]
 
-        rankf = dict(min=min_rank, max=max_rank, ordinal=ordinal_rank,
-                     average=average_rank, dense=dense_rank)
+        rankf = dict(
+            min=min_rank,
+            max=max_rank,
+            ordinal=ordinal_rank,
+            average=average_rank,
+            dense=dense_rank,
+        )
 
         def check_ranks(a):
-            for method in 'min', 'max', 'dense', 'ordinal', 'average':
+            for method in "min", "max", "dense", "ordinal", "average":
                 out = rankdata(a, method=method)
                 assert_array_equal(out, rankf[method](a))
 
-        val = ['foo', 'bar', 'qux', 'xyz', 'abc', 'efg', 'ace', 'qwe', 'qaz']
+        val = ["foo", "bar", "qux", "xyz", "abc", "efg", "ace", "qwe", "qaz"]
         check_ranks(np.random.choice(val, 200))
-        check_ranks(np.random.choice(val, 200).astype('object'))
+        check_ranks(np.random.choice(val, 200).astype("object"))
 
-        val = np.array([0, 1, 2, 2.718, 3, 3.141], dtype='object')
-        check_ranks(np.random.choice(val, 200).astype('object'))
+        val = np.array([0, 1, 2, 2.718, 3, 3.141], dtype="object")
+        check_ranks(np.random.choice(val, 200).astype("object"))
 
     def test_large_int(self):
-        data = np.array([2**60, 2**60+1], dtype=np.uint64)
+        data = np.array([2 ** 60, 2 ** 60 + 1], dtype=np.uint64)
         r = rankdata(data)
         assert_array_equal(r, [1.0, 2.0])
 
-        data = np.array([2**60, 2**60+1], dtype=np.int64)
+        data = np.array([2 ** 60, 2 ** 60 + 1], dtype=np.int64)
         r = rankdata(data)
         assert_array_equal(r, [1.0, 2.0])
 
-        data = np.array([2**60, -2**60+1], dtype=np.int64)
+        data = np.array([2 ** 60, -2 ** 60 + 1], dtype=np.int64)
         r = rankdata(data)
         assert_array_equal(r, [2.0, 1.0])
 
@@ -166,49 +169,48 @@ class TestRankData(object):
             data = np.ones(n, dtype=int)
             r = rankdata(data)
             expected_rank = 0.5 * (n + 1)
-            assert_array_equal(r, expected_rank * data,
-                               "test failed with n=%d" % n)
+            assert_array_equal(r, expected_rank * data, "test failed with n=%d" % n)
 
 
 _cases = (
     # values, method, expected
-    ([], 'average', []),
-    ([], 'min', []),
-    ([], 'max', []),
-    ([], 'dense', []),
-    ([], 'ordinal', []),
+    ([], "average", []),
+    ([], "min", []),
+    ([], "max", []),
+    ([], "dense", []),
+    ([], "ordinal", []),
     #
-    ([100], 'average', [1.0]),
-    ([100], 'min', [1.0]),
-    ([100], 'max', [1.0]),
-    ([100], 'dense', [1.0]),
-    ([100], 'ordinal', [1.0]),
+    ([100], "average", [1.0]),
+    ([100], "min", [1.0]),
+    ([100], "max", [1.0]),
+    ([100], "dense", [1.0]),
+    ([100], "ordinal", [1.0]),
     #
-    ([100, 100, 100], 'average', [2.0, 2.0, 2.0]),
-    ([100, 100, 100], 'min', [1.0, 1.0, 1.0]),
-    ([100, 100, 100], 'max', [3.0, 3.0, 3.0]),
-    ([100, 100, 100], 'dense', [1.0, 1.0, 1.0]),
-    ([100, 100, 100], 'ordinal', [1.0, 2.0, 3.0]),
+    ([100, 100, 100], "average", [2.0, 2.0, 2.0]),
+    ([100, 100, 100], "min", [1.0, 1.0, 1.0]),
+    ([100, 100, 100], "max", [3.0, 3.0, 3.0]),
+    ([100, 100, 100], "dense", [1.0, 1.0, 1.0]),
+    ([100, 100, 100], "ordinal", [1.0, 2.0, 3.0]),
     #
-    ([100, 300, 200], 'average', [1.0, 3.0, 2.0]),
-    ([100, 300, 200], 'min', [1.0, 3.0, 2.0]),
-    ([100, 300, 200], 'max', [1.0, 3.0, 2.0]),
-    ([100, 300, 200], 'dense', [1.0, 3.0, 2.0]),
-    ([100, 300, 200], 'ordinal', [1.0, 3.0, 2.0]),
+    ([100, 300, 200], "average", [1.0, 3.0, 2.0]),
+    ([100, 300, 200], "min", [1.0, 3.0, 2.0]),
+    ([100, 300, 200], "max", [1.0, 3.0, 2.0]),
+    ([100, 300, 200], "dense", [1.0, 3.0, 2.0]),
+    ([100, 300, 200], "ordinal", [1.0, 3.0, 2.0]),
     #
-    ([100, 200, 300, 200], 'average', [1.0, 2.5, 4.0, 2.5]),
-    ([100, 200, 300, 200], 'min', [1.0, 2.0, 4.0, 2.0]),
-    ([100, 200, 300, 200], 'max', [1.0, 3.0, 4.0, 3.0]),
-    ([100, 200, 300, 200], 'dense', [1.0, 2.0, 3.0, 2.0]),
-    ([100, 200, 300, 200], 'ordinal', [1.0, 2.0, 4.0, 3.0]),
+    ([100, 200, 300, 200], "average", [1.0, 2.5, 4.0, 2.5]),
+    ([100, 200, 300, 200], "min", [1.0, 2.0, 4.0, 2.0]),
+    ([100, 200, 300, 200], "max", [1.0, 3.0, 4.0, 3.0]),
+    ([100, 200, 300, 200], "dense", [1.0, 2.0, 3.0, 2.0]),
+    ([100, 200, 300, 200], "ordinal", [1.0, 2.0, 4.0, 3.0]),
     #
-    ([100, 200, 300, 200, 100], 'average', [1.5, 3.5, 5.0, 3.5, 1.5]),
-    ([100, 200, 300, 200, 100], 'min', [1.0, 3.0, 5.0, 3.0, 1.0]),
-    ([100, 200, 300, 200, 100], 'max', [2.0, 4.0, 5.0, 4.0, 2.0]),
-    ([100, 200, 300, 200, 100], 'dense', [1.0, 2.0, 3.0, 2.0, 1.0]),
-    ([100, 200, 300, 200, 100], 'ordinal', [1.0, 3.0, 5.0, 4.0, 2.0]),
+    ([100, 200, 300, 200, 100], "average", [1.5, 3.5, 5.0, 3.5, 1.5]),
+    ([100, 200, 300, 200, 100], "min", [1.0, 3.0, 5.0, 3.0, 1.0]),
+    ([100, 200, 300, 200, 100], "max", [2.0, 4.0, 5.0, 4.0, 2.0]),
+    ([100, 200, 300, 200, 100], "dense", [1.0, 2.0, 3.0, 2.0, 1.0]),
+    ([100, 200, 300, 200, 100], "ordinal", [1.0, 3.0, 5.0, 4.0, 2.0]),
     #
-    ([10] * 30, 'ordinal', np.arange(1.0, 31.0)),
+    ([10] * 30, "ordinal", np.arange(1.0, 31.0)),
 )
 
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division, print_function, absolute_import
+
 """
 ==============================================================================
 `go_benchmark_functions` --  Problems for testing global optimization routines
@@ -70,4 +71,4 @@ from .go_funcs_X import *
 from .go_funcs_Y import *
 from .go_funcs_Z import *
 
-__all__ = [s for s in dir() if not s.startswith('_')]
+__all__ = [s for s in dir() if not s.startswith("_")]

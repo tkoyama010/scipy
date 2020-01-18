@@ -43,17 +43,16 @@ class Watson(Benchmark):
 
         self._bounds = list(zip([-5.0] * self.N, [5.0] * self.N))
 
-        self.global_optimum = [[-0.0158, 1.012, -0.2329, 1.260, -1.513,
-                                0.9928]]
+        self.global_optimum = [[-0.0158, 1.012, -0.2329, 1.260, -1.513, 0.9928]]
         self.fglob = 0.002288
 
     def fun(self, x, *args):
         self.nfev += 1
 
-        i = atleast_2d(arange(30.)).T
-        a = i / 29.
-        j = arange(5.)
-        k = arange(6.)
+        i = atleast_2d(arange(30.0)).T
+        a = i / 29.0
+        j = arange(5.0)
+        k = arange(6.0)
 
         t1 = sum((j + 1) * a ** j * x[1:], axis=1)
         t2 = sum(a ** k * x, axis=1)
@@ -169,8 +168,7 @@ class WayburnSeader02(Benchmark):
     def __init__(self, dimensions=2):
         Benchmark.__init__(self, dimensions)
 
-        self._bounds = list(zip([-500.0] * self.N,
-                           [500.0] * self.N))
+        self._bounds = list(zip([-500.0] * self.N, [500.0] * self.N))
         self.custom_bounds = ([-1, 2], [-1, 2])
 
         self.global_optimum = [[0.2, 1.0]]
@@ -218,6 +216,7 @@ class Weierstrass(Benchmark):
     be included in the outer sum. Mishra code has it right as does the
     reference referred to in Jamil#166.
     """
+
     def __init__(self, dimensions=2):
         Benchmark.__init__(self, dimensions)
 
@@ -233,7 +232,7 @@ class Weierstrass(Benchmark):
         kmax = 20
         a, b = 0.5, 3.0
 
-        k = atleast_2d(arange(kmax + 1.)).T
+        k = atleast_2d(arange(kmax + 1.0)).T
         t1 = a ** k * cos(2 * pi * b ** k * (x + 0.5))
         t2 = self.N * sum(a ** k.T * cos(pi * b ** k.T))
 
@@ -270,8 +269,7 @@ class Whitley(Benchmark):
     def __init__(self, dimensions=2):
         Benchmark.__init__(self, dimensions)
 
-        self._bounds = list(zip([-10.24] * self.N,
-                           [10.24] * self.N))
+        self._bounds = list(zip([-10.24] * self.N, [10.24] * self.N))
         self.custom_bounds = ([-1, 2], [-1, 2])
 
         self.global_optimum = [[1.0 for _ in range(self.N)]]

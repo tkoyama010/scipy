@@ -36,18 +36,18 @@ import numpy
 def _extend_mode_to_code(mode):
     """Convert an extension mode to the corresponding integer code.
     """
-    if mode == 'nearest':
+    if mode == "nearest":
         return 0
-    elif mode == 'wrap':
+    elif mode == "wrap":
         return 1
-    elif mode == 'reflect':
+    elif mode == "reflect":
         return 2
-    elif mode == 'mirror':
+    elif mode == "mirror":
         return 3
-    elif mode == 'constant':
+    elif mode == "constant":
         return 4
     else:
-        raise RuntimeError('boundary mode not supported')
+        raise RuntimeError("boundary mode not supported")
 
 
 def _normalize_sequence(input, rank):
@@ -56,7 +56,7 @@ def _normalize_sequence(input, rank):
     check if its length is equal to the length of array.
     """
     is_str = isinstance(input, str)
-    if hasattr(input, '__iter__') and not is_str:
+    if hasattr(input, "__iter__") and not is_str:
         normalized = list(input)
         if len(normalized) != rank:
             err = "sequence argument must have length equal to input rank"
@@ -86,5 +86,5 @@ def _check_axis(axis, rank):
     if axis < 0:
         axis += rank
     if axis < 0 or axis >= rank:
-        raise ValueError('invalid axis')
+        raise ValueError("invalid axis")
     return axis

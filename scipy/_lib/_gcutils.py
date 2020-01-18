@@ -15,10 +15,10 @@ import sys
 
 from contextlib import contextmanager
 
-__all__ = ['set_gc_state', 'gc_state', 'assert_deallocated']
+__all__ = ["set_gc_state", "gc_state", "assert_deallocated"]
 
 
-IS_PYPY = '__pypy__' in sys.modules
+IS_PYPY = "__pypy__" in sys.modules
 
 
 class ReferenceError(AssertionError):

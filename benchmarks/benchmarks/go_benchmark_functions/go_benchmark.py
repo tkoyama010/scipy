@@ -67,7 +67,7 @@ class Benchmark(object):
         self.custom_bounds = None
 
     def __str__(self):
-        return '{0} ({1} dimensions)'.format(self.__class__.__name__, self.N)
+        return "{0} ({1} dimensions)".format(self.__class__.__name__, self.N)
 
     def __repr__(self):
         return self.__class__.__name__
@@ -86,7 +86,7 @@ class Benchmark(object):
 
         return asarray([np.random.uniform(l, u) for l, u in self.bounds])
 
-    def success(self, x, tol=1.e-5):
+    def success(self, x, tol=1.0e-5):
         """
         Tests if a candidate solution at the global minimum.
         The default test is
@@ -116,10 +116,7 @@ class Benchmark(object):
 
         # you found a lower global minimum.  This shouldn't happen.
         if val < self.fglob:
-            raise ValueError("Found a lower global minimum",
-                             x,
-                             val,
-                             self.fglob)
+            raise ValueError("Found a lower global minimum", x, val, self.fglob)
 
         return False
 
@@ -156,8 +153,7 @@ class Benchmark(object):
         if self.change_dimensionality:
             self._dimensions = ndim
         else:
-            raise ValueError('dimensionality cannot be changed for this'
-                             'problem')
+            raise ValueError("dimensionality cannot be changed for this" "problem")
 
     @property
     def bounds(self):

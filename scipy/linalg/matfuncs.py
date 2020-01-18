@@ -4,12 +4,38 @@
 
 from __future__ import division, print_function, absolute_import
 
-__all__ = ['expm','cosm','sinm','tanm','coshm','sinhm',
-           'tanhm','logm','funm','signm','sqrtm',
-           'expm_frechet', 'expm_cond', 'fractional_matrix_power']
+__all__ = [
+    "expm",
+    "cosm",
+    "sinm",
+    "tanm",
+    "coshm",
+    "sinhm",
+    "tanhm",
+    "logm",
+    "funm",
+    "signm",
+    "sqrtm",
+    "expm_frechet",
+    "expm_cond",
+    "fractional_matrix_power",
+]
 
-from numpy import (Inf, dot, diag, prod, logical_not, ravel,
-        transpose, conjugate, absolute, amax, sign, isfinite, single)
+from numpy import (
+    Inf,
+    dot,
+    diag,
+    prod,
+    logical_not,
+    ravel,
+    transpose,
+    conjugate,
+    absolute,
+    amax,
+    sign,
+    isfinite,
+    single,
+)
 import numpy as np
 
 # Local imports
@@ -24,7 +50,7 @@ from ._matfuncs_sqrtm import sqrtm
 eps = np.finfo(float).eps
 feps = np.finfo(single).eps
 
-_array_precision = {'i': 1, 'l': 1, 'f': 0, 'd': 1, 'F': 0, 'D': 1}
+_array_precision = {"i": 1, "l": 1, "f": 0, "d": 1, "F": 0, "D": 1}
 
 
 ###############################################################################
@@ -51,7 +77,7 @@ def _asarray_square(A):
     """
     A = np.asarray(A)
     if len(A.shape) != 2 or A.shape[0] != A.shape[1]:
-        raise ValueError('expected square array_like input')
+        raise ValueError("expected square array_like input")
     return A
 
 
@@ -83,7 +109,7 @@ def _maybe_real(A, B, tol=None):
     # Note that booleans and integers compare as real.
     if np.isrealobj(A) and np.iscomplexobj(B):
         if tol is None:
-            tol = {0:feps*1e3, 1:eps*1e6}[_array_precision[B.dtype.char]]
+            tol = {0: feps * 1e3, 1: eps * 1e6}[_array_precision[B.dtype.char]]
         if np.allclose(B.imag, 0.0, atol=tol):
             B = B.real
     return B
@@ -135,6 +161,7 @@ def fractional_matrix_power(A, t):
     # this function calls onenormest which is in scipy.sparse.
     A = _asarray_square(A)
     import scipy.linalg._matfuncs_inv_ssq
+
     return scipy.linalg._matfuncs_inv_ssq._fractional_matrix_power(A, t)
 
 
@@ -195,11 +222,12 @@ def logm(A, disp=True):
     A = _asarray_square(A)
     # Avoid circular import ... this is OK, right?
     import scipy.linalg._matfuncs_inv_ssq
+
     F = scipy.linalg._matfuncs_inv_ssq._logm(A)
     F = _maybe_real(A, F)
-    errtol = 1000*eps
-    #TODO use a better error approximation
-    errest = norm(expm(F)-A,1) / norm(A,1)
+    errtol = 1000 * eps
+    # TODO use a better error approximation
+    errest = norm(expm(F) - A, 1) / norm(A, 1)
     if disp:
         if not isfinite(errest) or errest >= errtol:
             print("logm result may be inaccurate, approximate err =", errest)
@@ -253,6 +281,7 @@ def expm(A):
     """
     # Input checking and conversion is provided by sparse.linalg.expm().
     import scipy.sparse.linalg
+
     return scipy.sparse.linalg.expm(A)
 
 
@@ -290,9 +319,9 @@ def cosm(A):
     """
     A = _asarray_square(A)
     if np.iscomplexobj(A):
-        return 0.5*(expm(1j*A) + expm(-1j*A))
+        return 0.5 * (expm(1j * A) + expm(-1j * A))
     else:
-        return expm(1j*A).real
+        return expm(1j * A).real
 
 
 def sinm(A):
@@ -329,9 +358,9 @@ def sinm(A):
     """
     A = _asarray_square(A)
     if np.iscomplexobj(A):
-        return -0.5j*(expm(1j*A) - expm(-1j*A))
+        return -0.5j * (expm(1j * A) - expm(-1j * A))
     else:
-        return expm(1j*A).imag
+        return expm(1j * A).imag
 
 
 def tanm(A):
@@ -551,39 +580,39 @@ def funm(A, func, disp=True):
     A = _asarray_square(A)
     # Perform Shur decomposition (lapack ?gees)
     T, Z = schur(A)
-    T, Z = rsf2csf(T,Z)
-    n,n = T.shape
+    T, Z = rsf2csf(T, Z)
+    n, n = T.shape
     F = diag(func(diag(T)))  # apply function to diagonal elements
     F = F.astype(T.dtype.char)  # e.g., when F is real but T is complex
 
-    minden = abs(T[0,0])
+    minden = abs(T[0, 0])
 
     # implement Algorithm 11.1.1 from Golub and Van Loan
     #                 "matrix Computations."
-    for p in range(1,n):
-        for i in range(1,n-p+1):
+    for p in range(1, n):
+        for i in range(1, n - p + 1):
             j = i + p
-            s = T[i-1,j-1] * (F[j-1,j-1] - F[i-1,i-1])
-            ksl = slice(i,j-1)
-            val = dot(T[i-1,ksl],F[ksl,j-1]) - dot(F[i-1,ksl],T[ksl,j-1])
+            s = T[i - 1, j - 1] * (F[j - 1, j - 1] - F[i - 1, i - 1])
+            ksl = slice(i, j - 1)
+            val = dot(T[i - 1, ksl], F[ksl, j - 1]) - dot(F[i - 1, ksl], T[ksl, j - 1])
             s = s + val
-            den = T[j-1,j-1] - T[i-1,i-1]
+            den = T[j - 1, j - 1] - T[i - 1, i - 1]
             if den != 0.0:
                 s = s / den
-            F[i-1,j-1] = s
-            minden = min(minden,abs(den))
+            F[i - 1, j - 1] = s
+            minden = min(minden, abs(den))
 
     F = dot(dot(Z, F), transpose(conjugate(Z)))
     F = _maybe_real(A, F)
 
-    tol = {0:feps, 1:eps}[_array_precision[F.dtype.char]]
+    tol = {0: feps, 1: eps}[_array_precision[F.dtype.char]]
     if minden == 0.0:
         minden = tol
-    err = min(1, max(tol,(tol/minden)*norm(triu(T,1),1)))
-    if prod(ravel(logical_not(isfinite(F))),axis=0):
+    err = min(1, max(tol, (tol / minden) * norm(triu(T, 1), 1)))
+    if prod(ravel(logical_not(isfinite(F))), axis=0):
         err = Inf
     if disp:
-        if err > 1000*tol:
+        if err > 1000 * tol:
             print("funm result may be inaccurate, approximate err =", err)
         return F
     else:
@@ -627,13 +656,14 @@ def signm(A, disp=True):
 
     def rounded_sign(x):
         rx = np.real(x)
-        if rx.dtype.char == 'f':
-            c = 1e3*feps*amax(x)
+        if rx.dtype.char == "f":
+            c = 1e3 * feps * amax(x)
         else:
-            c = 1e3*eps*amax(x)
+            c = 1e3 * eps * amax(x)
         return sign((absolute(rx) > c) * rx)
+
     result, errest = funm(A, rounded_sign, disp=0)
-    errtol = {0:1e3*feps, 1:1e3*eps}[_array_precision[result.dtype.char]]
+    errtol = {0: 1e3 * feps, 1: 1e3 * eps}[_array_precision[result.dtype.char]]
     if errest < errtol:
         return result
 
@@ -651,14 +681,14 @@ def signm(A, disp=True):
     max_sv = np.amax(vals)
     # min_nonzero_sv = vals[(vals>max_sv*errtol).tolist().count(1)-1]
     # c = 0.5/min_nonzero_sv
-    c = 0.5/max_sv
-    S0 = A + c*np.identity(A.shape[0])
+    c = 0.5 / max_sv
+    S0 = A + c * np.identity(A.shape[0])
     prev_errest = errest
     for i in range(100):
         iS0 = inv(S0)
-        S0 = 0.5*(S0 + iS0)
-        Pp = 0.5*(dot(S0,S0)+S0)
-        errest = norm(dot(Pp,Pp)-Pp,1)
+        S0 = 0.5 * (S0 + iS0)
+        Pp = 0.5 * (dot(S0, S0) + S0)
+        errest = norm(dot(Pp, Pp) - Pp, 1)
         if errest < errtol or prev_errest == errest:
             break
         prev_errest = errest

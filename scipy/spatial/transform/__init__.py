@@ -21,8 +21,9 @@ from __future__ import division, print_function, absolute_import
 from .rotation import Rotation, Slerp
 from ._rotation_spline import RotationSpline
 
-__all__ = ['Rotation', 'Slerp', 'RotationSpline']
+__all__ = ["Rotation", "Slerp", "RotationSpline"]
 
 from scipy._lib._testutils import PytestTester
+
 test = PytestTester(__name__)
 del PytestTester

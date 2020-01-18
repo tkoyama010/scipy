@@ -7,16 +7,24 @@ Convenience interface to N-D interpolation
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
-from .interpnd import LinearNDInterpolator, NDInterpolatorBase, \
-     CloughTocher2DInterpolator, _ndim_coords_from_arrays
+from .interpnd import (
+    LinearNDInterpolator,
+    NDInterpolatorBase,
+    CloughTocher2DInterpolator,
+    _ndim_coords_from_arrays,
+)
 from scipy.spatial import cKDTree
 
-__all__ = ['griddata', 'NearestNDInterpolator', 'LinearNDInterpolator',
-           'CloughTocher2DInterpolator']
+__all__ = [
+    "griddata",
+    "NearestNDInterpolator",
+    "LinearNDInterpolator",
+    "CloughTocher2DInterpolator",
+]
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Nearest-neighbor interpolation
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 
 class NearestNDInterpolator(NDInterpolatorBase):
@@ -56,9 +64,9 @@ class NearestNDInterpolator(NDInterpolatorBase):
     """
 
     def __init__(self, x, y, rescale=False, tree_options=None):
-        NDInterpolatorBase.__init__(self, x, y, rescale=rescale,
-                                    need_contiguous=False,
-                                    need_values=False)
+        NDInterpolatorBase.__init__(
+            self, x, y, rescale=rescale, need_contiguous=False, need_values=False
+        )
         if tree_options is None:
             tree_options = dict()
         self.tree = cKDTree(self.points, **tree_options)
@@ -81,12 +89,12 @@ class NearestNDInterpolator(NDInterpolatorBase):
         return self.values[i]
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Convenience interface function
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
-def griddata(points, values, xi, method='linear', fill_value=np.nan,
-             rescale=False):
+
+def griddata(points, values, xi, method="linear", fill_value=np.nan, rescale=False):
     """
     Interpolate unstructured D-D data.
 
@@ -197,8 +205,9 @@ def griddata(points, values, xi, method='linear', fill_value=np.nan,
     else:
         ndim = points.shape[-1]
 
-    if ndim == 1 and method in ('nearest', 'linear', 'cubic'):
+    if ndim == 1 and method in ("nearest", "linear", "cubic"):
         from .interpolate import interp1d
+
         points = points.ravel()
         if isinstance(xi, tuple):
             if len(xi) != 1:
@@ -208,22 +217,32 @@ def griddata(points, values, xi, method='linear', fill_value=np.nan,
         idx = np.argsort(points)
         points = points[idx]
         values = values[idx]
-        if method == 'nearest':
-            fill_value = 'extrapolate'
-        ip = interp1d(points, values, kind=method, axis=0, bounds_error=False,
-                      fill_value=fill_value)
+        if method == "nearest":
+            fill_value = "extrapolate"
+        ip = interp1d(
+            points,
+            values,
+            kind=method,
+            axis=0,
+            bounds_error=False,
+            fill_value=fill_value,
+        )
         return ip(xi)
-    elif method == 'nearest':
+    elif method == "nearest":
         ip = NearestNDInterpolator(points, values, rescale=rescale)
         return ip(xi)
-    elif method == 'linear':
-        ip = LinearNDInterpolator(points, values, fill_value=fill_value,
-                                  rescale=rescale)
+    elif method == "linear":
+        ip = LinearNDInterpolator(
+            points, values, fill_value=fill_value, rescale=rescale
+        )
         return ip(xi)
-    elif method == 'cubic' and ndim == 2:
-        ip = CloughTocher2DInterpolator(points, values, fill_value=fill_value,
-                                        rescale=rescale)
+    elif method == "cubic" and ndim == 2:
+        ip = CloughTocher2DInterpolator(
+            points, values, fill_value=fill_value, rescale=rescale
+        )
         return ip(xi)
     else:
-        raise ValueError("Unknown interpolation method %r for "
-                         "%d dimensional data" % (method, ndim))
+        raise ValueError(
+            "Unknown interpolation method %r for "
+            "%d dimensional data" % (method, ndim)
+        )

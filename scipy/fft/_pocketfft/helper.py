@@ -32,8 +32,9 @@ def _iterable_of_int(x, name=None):
         x = [operator.index(a) for a in x]
     except TypeError as e:
         name = name or "value"
-        raise ValueError("{} must be a scalar or iterable of integers"
-                         .format(name)) from e
+        raise ValueError(
+            "{} must be a scalar or iterable of integers".format(name)
+        ) from e
 
     return x
 
@@ -44,7 +45,7 @@ def _init_nd_shape_and_axes(x, shape, axes):
     noaxes = axes is None
 
     if not noaxes:
-        axes = _iterable_of_int(axes, 'axes')
+        axes = _iterable_of_int(axes, "axes")
         axes = [a + x.ndim if a < 0 else a for a in axes]
 
         if any(a >= x.ndim or a < 0 for a in axes):
@@ -53,11 +54,12 @@ def _init_nd_shape_and_axes(x, shape, axes):
             raise ValueError("all axes must be unique")
 
     if not noshape:
-        shape = _iterable_of_int(shape, 'shape')
+        shape = _iterable_of_int(shape, "shape")
 
         if axes and len(axes) != len(shape):
-            raise ValueError("when given, axes and shape arguments"
-                             " have to be of the same length")
+            raise ValueError(
+                "when given, axes and shape arguments" " have to be of the same length"
+            )
         if noaxes:
             if len(shape) > x.ndim:
                 raise ValueError("shape requires more axes than are present")
@@ -71,8 +73,7 @@ def _init_nd_shape_and_axes(x, shape, axes):
         shape = [x.shape[a] for a in axes]
 
     if any(s < 1 for s in shape):
-        raise ValueError(
-            "invalid number of data points ({0}) specified".format(shape))
+        raise ValueError("invalid number of data points ({0}) specified".format(shape))
 
     return shape, axes
 
@@ -88,11 +89,12 @@ def _asfarray(x):
 
     if x.dtype == np.float16:
         return np.asarray(x, np.float32)
-    elif x.dtype.kind not in 'fc':
+    elif x.dtype.kind not in "fc":
         return np.asarray(x, np.float64)
 
     # Always align input
-    return np.array(x, copy=not x.flags['ALIGNED'])
+    return np.array(x, copy=not x.flags["ALIGNED"])
+
 
 def _datacopied(arr, original):
     """
@@ -101,7 +103,7 @@ def _datacopied(arr, original):
     """
     if arr is original:
         return False
-    if not isinstance(original, np.ndarray) and hasattr(original, '__array__'):
+    if not isinstance(original, np.ndarray) and hasattr(original, "__array__"):
         return False
     return arr.base is None
 
@@ -111,7 +113,7 @@ def _fix_shape(x, shape, axes):
     must_copy = False
 
     # Build an nd slice with the dimensions to be read from x
-    index = [slice(None)]*x.ndim
+    index = [slice(None)] * x.ndim
     for n, ax in zip(shape, axes):
         if x.shape[ax] >= n:
             index[ax] = slice(0, n)
@@ -135,8 +137,7 @@ def _fix_shape(x, shape, axes):
 
 def _fix_shape_1d(x, n, axis):
     if n < 1:
-        raise ValueError(
-            "invalid number of data points ({0}) specified".format(n))
+        raise ValueError("invalid number of data points ({0}) specified".format(n))
 
     return _fix_shape(x, (n,), (axis,))
 
@@ -147,23 +148,24 @@ def _normalization(norm, forward):
     if norm is None:
         return 0 if forward else 2
 
-    if norm == 'ortho':
+    if norm == "ortho":
         return 1
 
-    raise ValueError(
-        "Invalid norm value {}, should be None or \"ortho\".".format(norm))
+    raise ValueError('Invalid norm value {}, should be None or "ortho".'.format(norm))
 
 
 def _workers(workers):
     if workers is None:
-        return getattr(_config, 'default_workers', 1)
+        return getattr(_config, "default_workers", 1)
 
     if workers < 0:
         if workers >= -_cpu_count:
             workers += 1 + _cpu_count
         else:
-            raise ValueError("workers value out of range; got {}, must not be"
-                             " less than {}".format(workers, -_cpu_count))
+            raise ValueError(
+                "workers value out of range; got {}, must not be"
+                " less than {}".format(workers, -_cpu_count)
+            )
     elif workers == 0:
         raise ValueError("workers must not be zero")
 
@@ -207,4 +209,4 @@ def get_workers():
     ...     fft.get_workers()
     4
     """
-    return getattr(_config, 'default_workers', 1)
+    return getattr(_config, "default_workers", 1)

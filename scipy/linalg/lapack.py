@@ -677,6 +677,7 @@ from __future__ import division, print_function, absolute_import
 import numpy as _np
 from .blas import _get_funcs, _memoize_get_funcs
 from scipy.linalg import _flapack
+
 try:
     from scipy.linalg import _clapack
 except ImportError:
@@ -685,25 +686,27 @@ except ImportError:
 # Backward compatibility
 from .blas import find_best_blas_type as find_best_lapack_type
 from scipy._lib._util import DeprecatedImport as _DeprecatedImport
+
 clapack = _DeprecatedImport("scipy.linalg.blas.clapack", "scipy.linalg.lapack")
 flapack = _DeprecatedImport("scipy.linalg.blas.flapack", "scipy.linalg.lapack")
 
 # Expose all functions (only flapack --- clapack is an implementation detail)
 empty_module = None
 from scipy.linalg._flapack import *
+
 del empty_module
 
-__all__ = ['get_lapack_funcs']
+__all__ = ["get_lapack_funcs"]
 
 _dep_message = """The `*gegv` family of routines has been deprecated in
 LAPACK 3.6.0 in favor of the `*ggev` family of routines.
 The corresponding wrappers will be removed from SciPy in
 a future release."""
 
-cgegv = _np.deprecate(cgegv, old_name='cgegv', message=_dep_message)
-dgegv = _np.deprecate(dgegv, old_name='dgegv', message=_dep_message)
-sgegv = _np.deprecate(sgegv, old_name='sgegv', message=_dep_message)
-zgegv = _np.deprecate(zgegv, old_name='zgegv', message=_dep_message)
+cgegv = _np.deprecate(cgegv, old_name="cgegv", message=_dep_message)
+dgegv = _np.deprecate(dgegv, old_name="dgegv", message=_dep_message)
+sgegv = _np.deprecate(sgegv, old_name="sgegv", message=_dep_message)
+zgegv = _np.deprecate(zgegv, old_name="zgegv", message=_dep_message)
 
 # Modify _flapack in this scope so the deprecation warnings apply to
 # functions returned by get_lapack_funcs.
@@ -714,11 +717,16 @@ _flapack.zgegv = zgegv
 
 # some convenience alias for complex functions
 _lapack_alias = {
-    'corghr': 'cunghr', 'zorghr': 'zunghr',
-    'corghr_lwork': 'cunghr_lwork', 'zorghr_lwork': 'zunghr_lwork',
-    'corgqr': 'cungqr', 'zorgqr': 'zungqr',
-    'cormqr': 'cunmqr', 'zormqr': 'zunmqr',
-    'corgrq': 'cungrq', 'zorgrq': 'zungrq',
+    "corghr": "cunghr",
+    "zorghr": "zunghr",
+    "corghr_lwork": "cunghr_lwork",
+    "zorghr_lwork": "zunghr_lwork",
+    "corgqr": "cungqr",
+    "zorgqr": "zungqr",
+    "cormqr": "cunmqr",
+    "zormqr": "zunmqr",
+    "corgrq": "cungrq",
+    "zorgrq": "zungrq",
 }
 
 
@@ -788,9 +796,17 @@ def get_lapack_funcs(names, arrays=(), dtype=None):
     >>> udut, ipiv, x, info = xsysv(a, b, lwork=int(opt_lwork.real))
 
     """
-    return _get_funcs(names, arrays, dtype,
-                      "LAPACK", _flapack, _clapack,
-                      "flapack", "clapack", _lapack_alias)
+    return _get_funcs(
+        names,
+        arrays,
+        dtype,
+        "LAPACK",
+        _flapack,
+        _clapack,
+        "flapack",
+        "clapack",
+        _lapack_alias,
+    )
 
 
 _int32_max = _np.iinfo(_np.int32).max
@@ -817,11 +833,12 @@ def _compute_lwork(routine, *args, **kwargs):
     32000
 
     """
-    dtype = getattr(routine, 'dtype', None)
+    dtype = getattr(routine, "dtype", None)
     ret = routine(*args, **kwargs)
     if ret[-1] != 0:
-        raise ValueError("Internal work array size computation failed: "
-                         "%d" % (ret[-1],))
+        raise ValueError(
+            "Internal work array size computation failed: " "%d" % (ret[-1],)
+        )
 
     if len(ret) == 2:
         return _check_work_float(ret[0].real, dtype)
@@ -842,6 +859,8 @@ def _check_work_float(value, dtype):
 
     value = int(value)
     if value < 0 or value > _int32_max:
-        raise ValueError("Too large work array required -- computation cannot "
-                         "be performed with standard 32-bit LAPACK.")
+        raise ValueError(
+            "Too large work array required -- computation cannot "
+            "be performed with standard 32-bit LAPACK."
+        )
     return value

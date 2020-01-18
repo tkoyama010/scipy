@@ -17,6 +17,7 @@ import tokenize
 from numpy.testing import assert_
 import scipy
 
+
 class TestFFTPackImport(object):
     def test_fftpack_import(self):
         base = Path(scipy.__file__).parent
@@ -27,6 +28,7 @@ class TestFFTPackImport(object):
             # use tokenize to auto-detect encoding on systems where no
             # default encoding is defined (e.g., LANG='C')
             with tokenize.open(str(path)) as file:
-                assert_(all(not re.fullmatch(regexp, line)
-                            for line in file),
-                        "{0} contains an import from fftpack".format(path))
+                assert_(
+                    all(not re.fullmatch(regexp, line) for line in file),
+                    "{0} contains an import from fftpack".format(path),
+                )

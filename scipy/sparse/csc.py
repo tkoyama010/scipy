@@ -3,7 +3,7 @@ from __future__ import division, print_function, absolute_import
 
 __docformat__ = "restructuredtext en"
 
-__all__ = ['csc_matrix', 'isspmatrix_csc']
+__all__ = ["csc_matrix", "isspmatrix_csc"]
 
 
 import numpy as np
@@ -105,19 +105,24 @@ class csc_matrix(_cs_matrix):
            [2, 3, 6]])
 
     """
-    format = 'csc'
+
+    format = "csc"
 
     def transpose(self, axes=None, copy=False):
         if axes is not None:
-            raise ValueError(("Sparse matrices do not support "
-                              "an 'axes' parameter because swapping "
-                              "dimensions is the only logical permutation."))
+            raise ValueError(
+                (
+                    "Sparse matrices do not support "
+                    "an 'axes' parameter because swapping "
+                    "dimensions is the only logical permutation."
+                )
+            )
 
         M, N = self.shape
 
         from .csr import csr_matrix
-        return csr_matrix((self.data, self.indices,
-                           self.indptr), (N, M), copy=copy)
+
+        return csr_matrix((self.data, self.indices, self.indptr), (N, M), copy=copy)
 
     transpose.__doc__ = spmatrix.transpose.__doc__
 
@@ -134,22 +139,27 @@ class csc_matrix(_cs_matrix):
     tocsc.__doc__ = spmatrix.tocsc.__doc__
 
     def tocsr(self, copy=False):
-        M,N = self.shape
-        idx_dtype = get_index_dtype((self.indptr, self.indices),
-                                    maxval=max(self.nnz, N))
+        M, N = self.shape
+        idx_dtype = get_index_dtype(
+            (self.indptr, self.indices), maxval=max(self.nnz, N)
+        )
         indptr = np.empty(M + 1, dtype=idx_dtype)
         indices = np.empty(self.nnz, dtype=idx_dtype)
         data = np.empty(self.nnz, dtype=upcast(self.dtype))
 
-        csc_tocsr(M, N,
-                  self.indptr.astype(idx_dtype),
-                  self.indices.astype(idx_dtype),
-                  self.data,
-                  indptr,
-                  indices,
-                  data)
+        csc_tocsr(
+            M,
+            N,
+            self.indptr.astype(idx_dtype),
+            self.indices.astype(idx_dtype),
+            self.data,
+            indptr,
+            indices,
+            data,
+        )
 
         from .csr import csr_matrix
+
         A = csr_matrix((data, indices, indptr), shape=self.shape, copy=False)
         A.has_sorted_indices = True
         return A
@@ -173,7 +183,7 @@ class csc_matrix(_cs_matrix):
         col = col[nz_mask]
 
         # Sort them to be in C-style order
-        ind = np.argsort(row, kind='mergesort')
+        ind = np.argsort(row, kind="mergesort")
         row = row[ind]
         col = col[ind]
 
@@ -190,7 +200,7 @@ class csc_matrix(_cs_matrix):
         if i < 0:
             i += M
         if i < 0 or i >= M:
-            raise IndexError('index (%d) out of range' % i)
+            raise IndexError("index (%d) out of range" % i)
         return self._get_submatrix(minor=i).tocsr()
 
     def getcol(self, i):
@@ -202,7 +212,7 @@ class csc_matrix(_cs_matrix):
         if i < 0:
             i += N
         if i < 0 or i >= N:
-            raise IndexError('index (%d) out of range' % i)
+            raise IndexError("index (%d) out of range" % i)
         return self._get_submatrix(major=i, copy=True)
 
     def _get_intXarray(self, row, col):

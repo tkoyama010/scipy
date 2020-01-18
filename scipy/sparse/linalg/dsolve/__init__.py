@@ -53,16 +53,17 @@ Example session::
 
 from __future__ import division, print_function, absolute_import
 
-#import umfpack
-#__doc__ = '\n\n'.join( (__doc__,  umfpack.__doc__) )
-#del umfpack
+# import umfpack
+# __doc__ = '\n\n'.join( (__doc__,  umfpack.__doc__) )
+# del umfpack
 
 from .linsolve import *
 from ._superlu import SuperLU
 from . import _add_newdocs
 
-__all__ = [s for s in dir() if not s.startswith('_')]
+__all__ = [s for s in dir() if not s.startswith("_")]
 
 from scipy._lib._testutils import PytestTester
+
 test = PytestTester(__name__)
 del PytestTester

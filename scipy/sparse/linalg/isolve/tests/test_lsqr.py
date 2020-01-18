@@ -1,8 +1,12 @@
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
-from numpy.testing import (assert_, assert_equal, assert_almost_equal,
-                           assert_array_almost_equal)
+from numpy.testing import (
+    assert_,
+    assert_equal,
+    assert_almost_equal,
+    assert_array_almost_equal,
+)
 
 import scipy.sparse
 import scipy.sparse.linalg
@@ -37,6 +41,7 @@ def test_basic():
     xo = X[0]
     assert_(norm(svx - xo) < 1e-5)
 
+
 def test_gh_2466():
     row = np.array([0, 0])
     col = np.array([0, 1])
@@ -55,7 +60,7 @@ def test_well_conditioned_problems():
     A_sparse = scipy.sparse.eye(n, n)
     A_dense = A_sparse.toarray()
 
-    with np.errstate(invalid='raise'):
+    with np.errstate(invalid="raise"):
         for seed in range(30):
             rng = np.random.RandomState(seed + 10)
             beta = rng.rand(n)
@@ -118,21 +123,22 @@ if __name__ == "__main__":
     chio = X[8]
     mg = np.amax(G - G.T)
     if mg > 1e-14:
-        sym = 'No'
+        sym = "No"
     else:
-        sym = 'Yes'
+        sym = "Yes"
 
-    print('LSQR')
+    print("LSQR")
     print("Is linear operator symmetric? " + sym)
     print("n: %3g  iterations:   %3g" % (n, k))
     print("Norms computed in %.2fs by LSQR" % (time() - tic))
     print(" ||x||  %9.4e  ||r|| %9.4e  ||Ar||  %9.4e " % (chio, phio, psio))
     print("Residual norms computed directly:")
-    print(" ||x||  %9.4e  ||r|| %9.4e  ||Ar||  %9.4e" % (norm(xo),
-                                                          norm(G*xo - b),
-                                                          norm(G.T*(G*xo-b))))
+    print(
+        " ||x||  %9.4e  ||r|| %9.4e  ||Ar||  %9.4e"
+        % (norm(xo), norm(G * xo - b), norm(G.T * (G * xo - b)))
+    )
     print("Direct solution norms:")
-    print(" ||x||  %9.4e  ||r|| %9.4e " % (norm(svx), norm(G*svx - b)))
+    print(" ||x||  %9.4e  ||r|| %9.4e " % (norm(svx), norm(G * svx - b)))
     print("")
-    print(" || x_{direct} - x_{LSQR}|| %9.4e " % norm(svx-xo))
+    print(" || x_{direct} - x_{LSQR}|| %9.4e " % norm(svx - xo))
     print("")

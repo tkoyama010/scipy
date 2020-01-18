@@ -212,23 +212,36 @@ from ._procrustes import *
 from ._decomp_update import *
 from ._sketches import *
 
-__all__ = [s for s in dir() if not s.startswith('_')]
+__all__ = [s for s in dir() if not s.startswith("_")]
 
 from numpy.dual import register_func
-for k in ['norm', 'inv', 'svd', 'solve', 'det', 'eig', 'eigh', 'eigvals',
-          'eigvalsh', 'lstsq', 'cholesky']:
+
+for k in [
+    "norm",
+    "inv",
+    "svd",
+    "solve",
+    "det",
+    "eig",
+    "eigh",
+    "eigvals",
+    "eigvalsh",
+    "lstsq",
+    "cholesky",
+]:
     try:
         register_func(k, eval(k))
     except ValueError:
         pass
 
 try:
-    register_func('pinv', pinv2)
+    register_func("pinv", pinv2)
 except ValueError:
     pass
 
 del k, register_func
 
 from scipy._lib._testutils import PytestTester
+
 test = PytestTester(__name__)
 del PytestTester
